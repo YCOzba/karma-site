@@ -13,19 +13,39 @@
 
   <rect width="1760" height="1240" fill="url(#pg)"/>
 
-  <!-- enso: one breath, opened across the gutter -->
-  <path d="M1012 372 C1224 388 1288 640 1128 812 C960 992 656 952 588 760
-           C520 568 700 404 906 424"
-        fill="none" stroke="#211B14" stroke-opacity=".8" stroke-width="15"
-        stroke-linecap="round"/>
-  <path d="M906 424 C838 432 786 452 748 482"
-        fill="none" stroke="#211B14" stroke-opacity=".34" stroke-width="9"
-        stroke-linecap="round"/>
+  <!-- solids: a contour study running across the gutter -->
 
-  <circle cx="1176" cy="352" r="27" fill="none" stroke="#C6442B" stroke-opacity=".62" stroke-width="6"/>
+  <!-- cube: front square, offset back square, hidden edges left faint -->
+  <path d="M510 448 L510 668 L400 760" fill="none" stroke="#211B14" stroke-opacity=".2"
+        stroke-width="5" stroke-linejoin="round"/>
+  <path d="M510 668 L730 668" fill="none" stroke="#211B14" stroke-opacity=".2" stroke-width="5"/>
+  <path d="M400 540 L620 540 L620 760 L400 760 Z" fill="none" stroke="#211B14" stroke-opacity=".78"
+        stroke-width="8" stroke-linejoin="round"/>
+  <path d="M400 540 L510 448 L730 448 L620 540" fill="none" stroke="#211B14" stroke-opacity=".78"
+        stroke-width="8" stroke-linejoin="round"/>
+  <path d="M730 448 L730 668 L620 760" fill="none" stroke="#211B14" stroke-opacity=".78"
+        stroke-width="8" stroke-linejoin="round"/>
+
+  <!-- sphere, sitting over the gutter -->
+  <circle cx="900" cy="647" r="118" fill="none" stroke="#211B14" stroke-opacity=".74" stroke-width="8"/>
+  <path d="M800 706 C852 744 948 744 1000 704" fill="none" stroke="#211B14" stroke-opacity=".24"
+        stroke-width="5" stroke-linecap="round"/>
+
+  <!-- cylinder -->
+  <path d="M1140 520 L1140 735" fill="none" stroke="#211B14" stroke-opacity=".72" stroke-width="8"/>
+  <path d="M1310 520 L1310 735" fill="none" stroke="#211B14" stroke-opacity=".72" stroke-width="8"/>
+  <ellipse cx="1225" cy="520" rx="85" ry="30" fill="none" stroke="#211B14" stroke-opacity=".72" stroke-width="8"/>
+  <path d="M1140 735 C1140 752 1310 752 1310 735" fill="none" stroke="#211B14" stroke-opacity=".72"
+        stroke-width="8" stroke-linecap="round"/>
+  <path d="M1140 735 C1140 718 1310 718 1310 735" fill="none" stroke="#211B14" stroke-opacity=".2"
+        stroke-width="5" stroke-linecap="round"/>
+
+  <!-- the surface all three sit on -->
+  <path d="M330 772 L1430 758" fill="none" stroke="#6F7D8C" stroke-opacity=".5" stroke-width="5"
+        stroke-linecap="round"/>
 
   <text x="440" y="1074" text-anchor="middle" font-family="Georgia,'Times New Roman',serif"
-        font-size="27" letter-spacing="9" fill="#6a5c44" fill-opacity=".82">ENSO</text>
+        font-size="27" letter-spacing="9" fill="#6a5c44" fill-opacity=".82">CİSİMLER</text>
 
   <text x="86" y="1168" font-family="Georgia,serif" font-size="30" fill="#211B14" fill-opacity=".4">2</text>
   <text x="1674" y="1168" text-anchor="end" font-family="Georgia,serif" font-size="30" fill="#211B14" fill-opacity=".4">3</text>

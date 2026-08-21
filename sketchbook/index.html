@@ -9,12 +9,11 @@
     --paper:#E9E1CE;
     --paper-lit:#F6F0DE;
     --paper-dim:#DCD0B4;
-    --wood:#43301F;
     --ink:#211B14;
     --ink-soft:rgba(33,27,20,.58);
     --ink-faint:rgba(33,27,20,.34);
     --hairline:rgba(33,27,20,.14);
-    --shu:#C6442B;
+    --accent:#6F7D8C;        /* muted slate, for focus rings only */
     --pg:1.5%;               /* vertical inset for page shading */
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -25,7 +24,7 @@
     background-attachment:fixed;
     color:var(--ink);
     position:relative;
-    font-family:"Yu Mincho","Hiragino Mincho ProN",Georgia,"Times New Roman",serif;
+    font-family:Georgia,"Iowan Old Style","Times New Roman",serif;
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
     display:flex;flex-direction:column;align-items:center;
@@ -96,7 +95,7 @@
     -webkit-tap-highlight-color:transparent;
   }
   .sb-arrow:hover{color:var(--ink)}
-  .sb-arrow:focus-visible{outline:1.5px solid var(--shu);outline-offset:3px;border-radius:3px}
+  .sb-arrow:focus-visible{outline:1.5px solid var(--accent);outline-offset:3px;border-radius:3px}
 
   .sb-3d{
     position:relative;flex:1 1;min-width:0;max-width:880px;
@@ -241,7 +240,7 @@
     cursor:grab;z-index:60;-webkit-tap-highlight-color:transparent;
   }
   .sb-zone:active{cursor:grabbing}
-  .sb-zone:focus-visible{outline:1.5px solid var(--shu);outline-offset:-4px}
+  .sb-zone:focus-visible{outline:1.5px solid var(--accent);outline-offset:-4px}
   .sb-prev{left:0;width:50%}
   .sb-next{right:0;width:50%}
 
@@ -316,7 +315,7 @@
    ===================================================================== */
 const DIR = 'drawings/';
 const PAGES = [
-  { file: '01.svg', title: 'Enso' },
+  { file: '01.svg', title: 'Cisimler' },
   { file: '02.svg', title: 'Sırt' },
   { file: '03.svg', title: 'Yörünge' },
   { file: '04.svg', title: 'Dal' },

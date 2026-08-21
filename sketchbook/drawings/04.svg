@@ -23,7 +23,7 @@
   <path d="M840 420 C900 372 976 352 1060 356"
         fill="none" stroke="#211B14" stroke-opacity=".5" stroke-width="8" stroke-linecap="round"/>
   <path d="M968 386 C1088 372 1204 404 1300 470"
-        fill="none" stroke="#C6442B" stroke-opacity=".5" stroke-width="8" stroke-linecap="round"/>
+        fill="none" stroke="#6F7D8C" stroke-opacity=".5" stroke-width="8" stroke-linecap="round"/>
 
   <ellipse cx="1112" cy="330" rx="34" ry="15" transform="rotate(-18 1112 330)"
            fill="none" stroke="#211B14" stroke-opacity=".42" stroke-width="6"/>

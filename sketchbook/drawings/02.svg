@@ -24,7 +24,7 @@
         fill="none" stroke="#211B14" stroke-opacity=".26" stroke-width="7"
         stroke-linecap="round" stroke-linejoin="round"/>
 
-  <circle cx="1352" cy="366" r="46" fill="none" stroke="#C6442B" stroke-opacity=".55" stroke-width="7"/>
+  <circle cx="1352" cy="366" r="46" fill="none" stroke="#6F7D8C" stroke-opacity=".55" stroke-width="7"/>
 
   <text x="440" y="1074" text-anchor="middle" font-family="Georgia,'Times New Roman',serif"
         font-size="27" letter-spacing="9" fill="#6a5c44" fill-opacity=".82">SIRT</text>
