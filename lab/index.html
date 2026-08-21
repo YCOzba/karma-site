@@ -5,75 +5,96 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>lab — karma</title>
 <style>
+  /* fonts served from this folder — no external requests.
+     Gochi Hand + Averia Serif Libre, both SIL Open Font License. */
+  @font-face{font-family:'Gochi Hand';font-style:normal;font-weight:400;font-display:swap;
+    src:url(fonts/gochi-hand.woff2) format('woff2')}
+  @font-face{font-family:'Averia Serif Libre';font-style:normal;font-weight:400;font-display:swap;
+    src:url(fonts/averia-400.woff2) format('woff2')}
+
   :root{
-    --paper:#E9E1CE;
-    --paper-lit:#F6F0DE;
-    --paper-dim:#DCD0B4;
-    --ink:#211B14;
-    --ink-soft:rgba(33,27,20,.58);
-    --ink-faint:rgba(33,27,20,.34);
-    --shu:#C6442B;
+    /* sampled from jackiezhang.co.za */
+    --ground:#212121;
+    --ground-2:#1C1C1C;
+    --shu:#E35342;          /* the red-orange that carries the whole site */
+    --shu-deep:#C24234;
+    --cream:#F5E1CD;
+    --cream-lit:#F5ECE3;
+    --tan:#D4C8BC;
+    --ink:#171717;
+    --hand:'Gochi Hand','Bradley Hand','Segoe Print',cursive;
+    --wob:'Averia Serif Libre',Georgia,serif;
     --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Courier New",monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
   body{
     background:
-      /* the cutting mat: fine grid, with a heavier rule every fifth line */
-      repeating-linear-gradient(0deg,  rgba(70,52,28,.055) 0 1px, transparent 1px 34px),
-      repeating-linear-gradient(90deg, rgba(70,52,28,.055) 0 1px, transparent 1px 34px),
-      repeating-linear-gradient(0deg,  rgba(70,52,28,.10) 0 1px, transparent 1px 170px),
-      repeating-linear-gradient(90deg, rgba(70,52,28,.10) 0 1px, transparent 1px 170px),
-      radial-gradient(130% 100% at 50% 30%, var(--paper-lit), var(--paper) 58%, var(--paper-dim) 100%);
-    color:var(--ink);
-    font-family:"Yu Mincho","Hiragino Mincho ProN",Georgia,"Times New Roman",serif;
+      /* cutting mat, drawn in the red at a whisper */
+      repeating-linear-gradient(0deg,  rgba(227,83,66,.055) 0 1px, transparent 1px 32px),
+      repeating-linear-gradient(90deg, rgba(227,83,66,.055) 0 1px, transparent 1px 32px),
+      repeating-linear-gradient(0deg,  rgba(227,83,66,.10) 0 1px, transparent 1px 160px),
+      repeating-linear-gradient(90deg, rgba(227,83,66,.10) 0 1px, transparent 1px 160px),
+      radial-gradient(120% 90% at 50% 34%, #262626, var(--ground) 56%, var(--ground-2) 100%);
+    color:var(--cream);
+    font-family:var(--wob);
     -webkit-font-smoothing:antialiased;
     overflow:hidden;
     overscroll-behavior:none;
   }
   body,body *{-webkit-user-select:none;-moz-user-select:none;user-select:none}
 
+  /* ---- the doodle strips that frame the reference's pages ---- */
+  .rail{
+    position:fixed;top:0;bottom:0;width:44px;z-index:5;
+    display:flex;flex-direction:column;gap:10px;
+    padding:10px 0;overflow:hidden;pointer-events:none;opacity:.5;
+  }
+  .rail.l{left:0}
+  .rail.r{right:0}
+  .rail svg{width:24px;height:24px;flex:none;margin:0 auto;color:var(--shu)}
+
   /* ---------------- chrome ---------------- */
   .bar{
     position:fixed;top:0;left:0;right:0;z-index:9000;
     display:flex;align-items:center;justify-content:space-between;gap:1rem;
-    padding:1.1rem clamp(1rem,3vw,2rem);
+    padding:1.05rem clamp(3.4rem,6vw,4.2rem);
     pointer-events:none;
   }
   .bar > *{pointer-events:auto}
   a.back,button.scatter{
-    font-family:system-ui,sans-serif;font-size:.76rem;letter-spacing:.1em;
-    color:var(--ink-soft);text-decoration:none;background:none;border:0;
-    display:inline-flex;align-items:center;gap:.45em;
-    cursor:pointer;transition:color .2s ease;
+    font-family:var(--hand);font-size:1.15rem;letter-spacing:.02em;
+    color:var(--cream);text-decoration:none;background:none;
+    border:0;cursor:pointer;transition:color .2s ease;
+    display:inline-flex;align-items:center;gap:.4em;line-height:1;
   }
   a.back::before{content:"←"}
   a.back:hover,button.scatter:hover{color:var(--shu)}
   button.scatter{
-    border:1px solid var(--hairline,rgba(33,27,20,.18));border-radius:999px;
-    padding:.42em 1em;background:rgba(255,252,244,.5);
-    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    border:2px solid var(--shu);border-radius:999px;
+    padding:.3em .95em .4em;color:var(--shu);
   }
+  button.scatter:hover{background:var(--shu);color:var(--ground)}
 
   .title{
     position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
     text-align:center;z-index:0;pointer-events:none;
   }
   .title h1{
-    font-size:clamp(4rem,17vw,11rem);font-weight:400;font-style:italic;
-    line-height:.86;letter-spacing:-.02em;color:rgba(33,27,20,.07);
+    font-family:var(--hand);
+    font-size:clamp(5rem,20vw,14rem);font-weight:400;
+    line-height:.82;color:rgba(227,83,66,.14);
   }
   .title p{
-    font-family:system-ui,sans-serif;
-    font-size:.7rem;letter-spacing:.34em;text-transform:uppercase;
-    color:rgba(33,27,20,.16);margin-top:.9rem;
+    font-family:var(--mono);
+    font-size:.66rem;letter-spacing:.4em;text-transform:uppercase;
+    color:rgba(245,225,205,.14);margin-top:1rem;
   }
 
   .hint{
-    position:fixed;left:50%;bottom:1.4rem;transform:translateX(-50%);
-    font-family:system-ui,sans-serif;
-    font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--ink-faint);z-index:9000;pointer-events:none;
+    position:fixed;left:50%;bottom:1.3rem;transform:translateX(-50%);
+    font-family:var(--hand);font-size:1.1rem;
+    color:rgba(245,225,205,.42);z-index:9000;pointer-events:none;
     transition:opacity .45s ease;text-align:center;padding:0 1rem;
   }
   .hint.gone{opacity:0}
@@ -83,8 +104,6 @@
 
   .card{
     position:absolute;top:0;left:0;
-    /* scraps keep their designed width until the screen is narrower
-       than they are, then they shrink instead of stacking up the edge */
     width:min(var(--w), 62vw);
     transform:translate3d(var(--x,0px),var(--y,0px),0);
     cursor:grab;touch-action:none;will-change:transform;
@@ -95,65 +114,48 @@
     transform:rotate(var(--r,0deg)) scale(var(--s,1));
     transition:transform .2s cubic-bezier(.22,.9,.3,1);
   }
-  /* the paper itself is a separate, filtered layer, so the torn edge
-     never drags the text through the displacement map with it */
+  /* the paper is its own filtered layer, so the torn edge never drags
+     the text through the displacement map with it */
   .paper{
     position:absolute;inset:-11px;
-    background:var(--tint,#F4EBD6);
-    filter:var(--torn) drop-shadow(0 5px 7px rgba(66,48,22,.22));
+    background:var(--tint,var(--cream));
+    filter:var(--torn) drop-shadow(0 6px 9px rgba(0,0,0,.5));
   }
   .card.held .paper{
-    filter:var(--torn) drop-shadow(0 16px 20px rgba(66,48,22,.3));
+    filter:var(--torn) drop-shadow(0 18px 26px rgba(0,0,0,.62));
   }
-  .content{
-    position:relative;
-    padding:clamp(.9rem,2.4vw,1.35rem) clamp(1rem,2.6vw,1.5rem);
-  }
+  .content{position:relative;padding:clamp(.9rem,2.4vw,1.3rem) clamp(1rem,2.6vw,1.45rem)}
 
   .label{
     font-family:var(--mono);
-    font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
-    color:rgba(33,27,20,.38);margin-bottom:.6rem;
+    font-size:.56rem;letter-spacing:.22em;text-transform:uppercase;
+    color:rgba(23,23,23,.42);margin-bottom:.55rem;
   }
-  .type{
-    font-family:var(--mono);
-    font-size:clamp(.78rem,1.9vw,.92rem);line-height:1.5;color:#171717;
-  }
-  .quill{
-    font-style:italic;font-size:clamp(1.1rem,3vw,1.5rem);
-    line-height:1.28;color:var(--ink);
-  }
-  .shu{color:var(--shu)}
+  .type{font-family:var(--mono);font-size:clamp(.74rem,1.8vw,.86rem);line-height:1.55;color:var(--ink)}
+  .hand{font-family:var(--hand);font-size:clamp(1.5rem,4vw,2rem);line-height:1.12;color:var(--ink)}
+  .wob{font-family:var(--wob);font-size:clamp(1.3rem,3.2vw,1.7rem);line-height:1.26;color:var(--ink)}
+  .shu{color:var(--shu-deep)}
 
-  /* the swatch scrap */
-  .chips{display:flex;gap:6px;margin-top:.65rem}
-  .chips i{width:26px;height:34px;border-radius:1px;display:block}
+  .chips{display:flex;gap:5px;margin-top:.6rem}
+  .chips i{width:26px;height:34px;border-radius:1px;display:block;box-shadow:inset 0 0 0 1px rgba(23,23,23,.14)}
 
-  /* the "photo" scrap */
-  .plate{
-    display:block;width:100%;height:auto;border-radius:1px;
-    box-shadow:inset 0 0 0 1px rgba(33,27,20,.1);
-  }
-  .caption{
-    font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;
-    color:rgba(33,27,20,.5);margin-top:.55rem;
-  }
+  .plate{display:block;width:100%;height:auto}
+  .caption{font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;color:rgba(23,23,23,.5);margin-top:.5rem}
 
-  @media (prefers-reduced-motion:reduce){
-    .tilt{transition:none}
-  }
+  @media (prefers-reduced-motion:reduce){ .tilt{transition:none} }
   @media (max-width:640px){
-    .title h1{font-size:22vw}
-    .content{padding:.8rem .95rem}
-    .type{font-size:.72rem;line-height:1.45}
-    .quill{font-size:1.15rem}
+    .rail{width:30px;opacity:.35}
+    .rail svg{width:17px;height:17px}
+    .bar{padding:.9rem 2.4rem}
+    .content{padding:.78rem .92rem}
+    .type{font-size:.7rem;line-height:1.45}
     .chips i{width:20px;height:27px}
   }
 </style>
 </head>
 <body>
 
-<!-- turbulence-displaced edges: four seeds so no two scraps tear alike -->
+<!-- torn edges: four seeds so no two scraps tear alike -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <filter id="torn1" x="-12%" y="-12%" width="124%" height="124%">
     <feTurbulence type="fractalNoise" baseFrequency="0.014 0.05" numOctaves="4" seed="7" result="n"/>
@@ -173,6 +175,9 @@
   </filter>
 </svg>
 
+<div class="rail l" id="railL" aria-hidden="true"></div>
+<div class="rail r" id="railR" aria-hidden="true"></div>
+
 <div class="bar">
   <a class="back" href="/">geri</a>
   <button class="scatter" id="scatter" type="button">dağıt</button>
@@ -185,59 +190,78 @@
 
 <div id="board"></div>
 
-<p class="hint" id="hint">parçaları sürükle · hepsi serbest</p>
+<p class="hint" id="hint">parçaları sürükle</p>
 
 <script>
 /* =====================================================================
    Kesme tahtası: yırtık kâğıt parçaları, serbestçe sürüklenir.
 
-   Mekanik Jackie Zhang'in portfolyosundaki (jackiezhang.co.za) kolaj
-   dilinden alındı — yırtık kenarlar, hafif açılar, doğal üst üste binme.
-   Not: oradaki parçalar aslında sürüklenmiyor, dizilim statik; sürükleme
+   Görsel dil jackiezhang.co.za'dan alındı — kömür zemin, #E35342
+   kırmızısı, krem kâğıt, Gochi Hand / Averia Serif Libre. Oradaki
+   parçalar aslında sürüklenmiyor (dizilim statik); sürükleme mekaniği
    buraya eklendi.
 
-   Yeni parça eklemek: aşağıdaki listeye tek nesne ekle. x/y birer oran
-   (0-1) — ekran boyutundan bağımsız yerleşsin diye.
+   Yeni parça: listeye tek nesne ekle. x/y birer oran (0-1).
    ===================================================================== */
 const SCRAPS = [
-  { x:.17, y:.20, r:-5.5, w:280, tint:'#F4EBD6', torn:'torn1', html:
+  { x:.19, y:.22, r:-5.5, w:290, tint:'#F5E1CD', torn:'torn1', html:
     `<p class="label">deneme 01</p>
      <p class="type">Bu bir kesme tahtası.<br>Parçaları istediğin gibi<br>dağıtabilirsin.</p>` },
 
-  { x:.60, y:.14, r:4,    w:250, tint:'#EFE4C6', torn:'torn2', html:
-    `<p class="quill">her şey<br>hâlâ <span class="shu">taslak</span></p>` },
+  { x:.62, y:.15, r:4, w:260, tint:'#F5ECE3', torn:'torn2', html:
+    `<p class="wob">her şey hâlâ<br><span class="shu">taslak</span></p>` },
 
-  { x:.68, y:.52, r:-3,   w:300, tint:'#F7F2E4', torn:'torn3', html:
+  { x:.70, y:.54, r:-3, w:300, tint:'#F5ECE3', torn:'torn3', html:
     `<p class="label">plaka · 03</p>
      ${plate()}
      <p class="caption">yer tutucu görsel</p>` },
 
-  { x:.13, y:.58, r:6,    w:236, tint:'#E6DBBE', torn:'torn4', html:
+  { x:.13, y:.60, r:6, w:238, tint:'#D4C8BC', torn:'torn4', html:
     `<p class="label">palet</p>
      <div class="chips">
-       <i style="background:#C6442B"></i><i style="background:#E9E1CE"></i>
-       <i style="background:#43301F"></i><i style="background:#8A7857"></i>
-       <i style="background:#F6F0DE"></i>
+       <i style="background:#E35342"></i><i style="background:#C24234"></i>
+       <i style="background:#F5E1CD"></i><i style="background:#D4C8BC"></i>
+       <i style="background:#212121"></i>
      </div>` },
 
-  { x:.40, y:.68, r:-7,   w:266, tint:'#F2E9D2', torn:'torn2', html:
-    `<p class="label">not</p>
-     <p class="type">z-index sürükleyince<br>öne fırlıyor —<br>üst üste binmeler<br>kendiliğinden.</p>` },
+  { x:.41, y:.70, r:-7, w:272, tint:'#F5E1CD', torn:'torn2', html:
+    `<p class="hand">sürüklediğin<br>öne gelir</p>` },
 
-  { x:.44, y:.34, r:2.5,  w:220, tint:'#EDE7D4', torn:'torn1', html:
+  { x:.45, y:.36, r:2.5, w:228, tint:'#F5ECE3', torn:'torn1', html:
     `<p class="type"><span class="shu">const</span> lab = {<br>&nbsp;&nbsp;durum: <span class="shu">'açık'</span>,<br>&nbsp;&nbsp;kural: <span class="shu">yok</span><br>}</p>` },
 ];
 
-/* a self-contained placeholder plate — no external assets */
+/* a self-contained placeholder plate, drawn in the site's red */
 function plate(){
-  return `<svg class="plate" viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg">
-    <rect width="300" height="190" fill="#E3D8BC"/>
-    <circle cx="222" cy="52" r="26" fill="none" stroke="#C6442B" stroke-opacity=".62" stroke-width="3"/>
-    <path d="M18 158 L74 104 L108 132 L158 74 L196 122 L246 88 L282 124"
-          fill="none" stroke="#211B14" stroke-opacity=".62" stroke-width="4"
-          stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M18 172 L282 172" stroke="#211B14" stroke-opacity=".18" stroke-width="2"/>
+  return `<svg class="plate" viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+    <rect width="300" height="180" fill="#EFE0D0"/>
+    <circle cx="228" cy="46" r="22" fill="none" stroke="#E35342" stroke-width="3"/>
+    <path d="M20 150 L72 100 L106 128 L154 70 L192 118 L242 84 L282 118"
+          fill="none" stroke="#E35342" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M20 120 C56 108 86 126 120 112" fill="none" stroke="#171717" stroke-opacity=".38"
+          stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M20 164 L282 164" stroke="#171717" stroke-opacity=".16" stroke-width="2"/>
   </svg>`;
+}
+
+/* ---- the framing rails: small red doodles repeating down both edges ---- */
+const GLYPHS = [
+  '<path d="M4 18 L12 5 L20 18 Z"/><circle cx="12" cy="20" r="1.6"/>',
+  '<circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
+  '<rect x="5" y="5" width="14" height="14" rx="2"/><path d="M5 12h14"/>',
+  '<path d="M12 3 L21 12 L12 21 L3 12 Z"/>',
+  '<path d="M4 16c4-9 12-9 16 0"/><circle cx="12" cy="9" r="2"/>',
+  '<path d="M6 6l12 12M18 6L6 18"/>',
+  '<path d="M12 4v16M4 12h16"/><circle cx="12" cy="12" r="8"/>',
+];
+function fillRail(el){
+  const n = Math.ceil(innerHeight / 34) + 2;
+  let out = '';
+  for(let i = 0; i < n; i++){
+    out += `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round">${GLYPHS[i % GLYPHS.length]}</svg>`;
+  }
+  el.innerHTML = out;
 }
 
 const board = document.getElementById('board');
@@ -246,7 +270,7 @@ const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let top_ = 100;                    /* running z-index for the last-touched scrap */
 const cards = [];
 
-SCRAPS.forEach((s, i) => {
+SCRAPS.forEach(s => {
   const card = document.createElement('div');
   card.className = 'card';
   card.style.setProperty('--w', s.w + 'px');
@@ -259,14 +283,20 @@ SCRAPS.forEach((s, i) => {
   cards.push({ el:card, base:s, x:0, y:0, r:s.r });
 });
 
-/* ---- placement: ratios → pixels, clamped so nothing hides off-screen ----
-   the margin keeps the torn bleed (.paper sits at inset:-11px, and the
-   filter widens it further) inside the viewport, so an edge never reads
-   as a straight cut ---------------------------------------------------- */
+/* ---- placement: ratios → pixels. EDGE keeps the torn bleed (.paper sits
+   at inset:-11px, and the filter widens it further) inside the viewport,
+   so an edge never reads as a straight cut. RAIL keeps scraps clear of
+   the doodle strips. ------------------------------------------------- */
 const EDGE = 16;
-function clampX(c, x){ return Math.min(Math.max(EDGE, innerWidth  - c.el.offsetWidth  - EDGE), Math.max(EDGE, x)); }
-function clampY(c, y){ return Math.min(Math.max(EDGE, innerHeight - c.el.offsetHeight - EDGE), Math.max(EDGE, y)); }
-
+function rail(){ return innerWidth > 640 ? 44 : 30; }
+function clampX(c, x){
+  const lo = rail() + EDGE, hi = Math.max(lo, innerWidth - c.el.offsetWidth - rail() - EDGE);
+  return Math.min(hi, Math.max(lo, x));
+}
+function clampY(c, y){
+  const hi = Math.max(EDGE, innerHeight - c.el.offsetHeight - EDGE);
+  return Math.min(hi, Math.max(EDGE, y));
+}
 function place(c, rx, ry){
   c.x = clampX(c, rx * innerWidth  - c.el.offsetWidth/2);
   c.y = clampY(c, ry * innerHeight - c.el.offsetHeight/2);
@@ -278,8 +308,9 @@ function draw(c){
 }
 function layout(){ cards.forEach(c => place(c, c.base.x, c.base.y)); }
 
-/* keep everything reachable when the window changes size */
 addEventListener('resize', () => {
+  fillRail(document.getElementById('railL'));
+  fillRail(document.getElementById('railR'));
   cards.forEach(c => { c.x = clampX(c, c.x); c.y = clampY(c, c.y); draw(c); });
 });
 
@@ -326,17 +357,19 @@ board.addEventListener('dragstart', e => e.preventDefault());
 document.getElementById('scatter').addEventListener('click', () => {
   hint.classList.add('gone');
   cards.forEach(c => {
-    const rx = 0.12 + Math.random()*0.76;
-    const ry = 0.16 + Math.random()*0.66;
-    c.r = (Math.random()*16 - 8);
+    c.r = Math.random()*16 - 8;
     c.el.style.setProperty('--r', c.r.toFixed(2) + 'deg');
     c.el.style.zIndex = ++top_;
-    place(c, rx, ry);
+    place(c, 0.12 + Math.random()*0.76, 0.16 + Math.random()*0.66);
   });
 });
 
-/* offsetWidth needs a laid-out DOM, so place after the first paint */
+fillRail(document.getElementById('railL'));
+fillRail(document.getElementById('railR'));
+/* offsetWidth needs a laid-out DOM, and the webfonts change scrap
+   heights, so place once now and again once they land */
 requestAnimationFrame(layout);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
 </script>
 </body>
 </html>
