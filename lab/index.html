@@ -1,138 +1,342 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>lab — coming soon</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lab — karma</title>
 <style>
-  :root {
-    --paper: #f2e9d8;
-    --paper-edge: #e7d9bc;
-    --ink: #2b2420;
-    --ink-soft: #5c5145;
-    --stamp: #a13d2f;
+  :root{
+    --paper:#E9E1CE;
+    --paper-lit:#F6F0DE;
+    --paper-dim:#DCD0B4;
+    --ink:#211B14;
+    --ink-soft:rgba(33,27,20,.58);
+    --ink-faint:rgba(33,27,20,.34);
+    --shu:#C6442B;
+    --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Courier New",monospace;
   }
-
-  * { box-sizing: border-box; }
-
-  html, body {
-    height: 100%;
-    margin: 0;
-  }
-
-  body {
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
     background:
-      radial-gradient(ellipse at top left, rgba(255,255,255,0.25), transparent 60%),
-      var(--paper);
-    color: var(--ink);
-    font-family: "Iowan Old Style", "Palatino Linotype", Georgia, "Noto Serif", serif;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
+      /* the cutting mat: fine grid, with a heavier rule every fifth line */
+      repeating-linear-gradient(0deg,  rgba(70,52,28,.055) 0 1px, transparent 1px 34px),
+      repeating-linear-gradient(90deg, rgba(70,52,28,.055) 0 1px, transparent 1px 34px),
+      repeating-linear-gradient(0deg,  rgba(70,52,28,.10) 0 1px, transparent 1px 170px),
+      repeating-linear-gradient(90deg, rgba(70,52,28,.10) 0 1px, transparent 1px 170px),
+      radial-gradient(130% 100% at 50% 30%, var(--paper-lit), var(--paper) 58%, var(--paper-dim) 100%);
+    color:var(--ink);
+    font-family:"Yu Mincho","Hiragino Mincho ProN",Georgia,"Times New Roman",serif;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+    overscroll-behavior:none;
+  }
+  body,body *{-webkit-user-select:none;-moz-user-select:none;user-select:none}
+
+  /* ---------------- chrome ---------------- */
+  .bar{
+    position:fixed;top:0;left:0;right:0;z-index:9000;
+    display:flex;align-items:center;justify-content:space-between;gap:1rem;
+    padding:1.1rem clamp(1rem,3vw,2rem);
+    pointer-events:none;
+  }
+  .bar > *{pointer-events:auto}
+  a.back,button.scatter{
+    font-family:system-ui,sans-serif;font-size:.76rem;letter-spacing:.1em;
+    color:var(--ink-soft);text-decoration:none;background:none;border:0;
+    display:inline-flex;align-items:center;gap:.45em;
+    cursor:pointer;transition:color .2s ease;
+  }
+  a.back::before{content:"←"}
+  a.back:hover,button.scatter:hover{color:var(--shu)}
+  button.scatter{
+    border:1px solid var(--hairline,rgba(33,27,20,.18));border-radius:999px;
+    padding:.42em 1em;background:rgba(255,252,244,.5);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   }
 
-  /* subtle paper grain */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.06;
-    background-image:
-      repeating-linear-gradient(0deg, var(--ink) 0px, transparent 1px, transparent 2px),
-      repeating-linear-gradient(90deg, var(--ink) 0px, transparent 1px, transparent 2px);
-    background-size: 3px 3px;
-    mix-blend-mode: multiply;
+  .title{
+    position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    text-align:center;z-index:0;pointer-events:none;
+  }
+  .title h1{
+    font-size:clamp(4rem,17vw,11rem);font-weight:400;font-style:italic;
+    line-height:.86;letter-spacing:-.02em;color:rgba(33,27,20,.07);
+  }
+  .title p{
+    font-family:system-ui,sans-serif;
+    font-size:.7rem;letter-spacing:.34em;text-transform:uppercase;
+    color:rgba(33,27,20,.16);margin-top:.9rem;
   }
 
-  /* deckled paper border */
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 14px;
-    pointer-events: none;
-    border: 1px solid var(--paper-edge);
-    box-shadow: inset 0 0 60px rgba(90, 70, 40, 0.12);
+  .hint{
+    position:fixed;left:50%;bottom:1.4rem;transform:translateX(-50%);
+    font-family:system-ui,sans-serif;
+    font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-faint);z-index:9000;pointer-events:none;
+    transition:opacity .45s ease;text-align:center;padding:0 1rem;
+  }
+  .hint.gone{opacity:0}
+
+  /* ---------------- the scraps ---------------- */
+  #board{position:fixed;inset:0;z-index:10}
+
+  .card{
+    position:absolute;top:0;left:0;
+    /* scraps keep their designed width until the screen is narrower
+       than they are, then they shrink instead of stacking up the edge */
+    width:min(var(--w), 62vw);
+    transform:translate3d(var(--x,0px),var(--y,0px),0);
+    cursor:grab;touch-action:none;will-change:transform;
+  }
+  .card.held{cursor:grabbing}
+  .tilt{
+    position:relative;
+    transform:rotate(var(--r,0deg)) scale(var(--s,1));
+    transition:transform .2s cubic-bezier(.22,.9,.3,1);
+  }
+  /* the paper itself is a separate, filtered layer, so the torn edge
+     never drags the text through the displacement map with it */
+  .paper{
+    position:absolute;inset:-11px;
+    background:var(--tint,#F4EBD6);
+    filter:var(--torn) drop-shadow(0 5px 7px rgba(66,48,22,.22));
+  }
+  .card.held .paper{
+    filter:var(--torn) drop-shadow(0 16px 20px rgba(66,48,22,.3));
+  }
+  .content{
+    position:relative;
+    padding:clamp(.9rem,2.4vw,1.35rem) clamp(1rem,2.6vw,1.5rem);
   }
 
-  main {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    max-width: 32rem;
-    padding: 2rem;
+  .label{
+    font-family:var(--mono);
+    font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
+    color:rgba(33,27,20,.38);margin-bottom:.6rem;
+  }
+  .type{
+    font-family:var(--mono);
+    font-size:clamp(.78rem,1.9vw,.92rem);line-height:1.5;color:#171717;
+  }
+  .quill{
+    font-style:italic;font-size:clamp(1.1rem,3vw,1.5rem);
+    line-height:1.28;color:var(--ink);
+  }
+  .shu{color:var(--shu)}
+
+  /* the swatch scrap */
+  .chips{display:flex;gap:6px;margin-top:.65rem}
+  .chips i{width:26px;height:34px;border-radius:1px;display:block}
+
+  /* the "photo" scrap */
+  .plate{
+    display:block;width:100%;height:auto;border-radius:1px;
+    box-shadow:inset 0 0 0 1px rgba(33,27,20,.1);
+  }
+  .caption{
+    font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;
+    color:rgba(33,27,20,.5);margin-top:.55rem;
   }
 
-  .stamp {
-    width: 3.25rem;
-    height: 3.25rem;
-    margin: 0 auto 1.75rem;
-    border: 2px solid var(--stamp);
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--stamp);
-    font-size: 1.4rem;
-    transform: rotate(3deg);
-    opacity: 0.85;
+  @media (prefers-reduced-motion:reduce){
+    .tilt{transition:none}
   }
-
-  h1 {
-    font-size: 2.1rem;
-    font-weight: 400;
-    letter-spacing: 0.04em;
-    margin: 0 0 0.6rem;
-    font-style: italic;
-  }
-
-  p.tagline {
-    color: var(--ink-soft);
-    font-size: 1rem;
-    letter-spacing: 0.02em;
-    margin: 0 0 2.5rem;
-    line-height: 1.6;
-  }
-
-  .status {
-    display: inline-block;
-    font-size: 0.75rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    border-top: 1px solid var(--paper-edge);
-    border-bottom: 1px solid var(--paper-edge);
-    padding: 0.6rem 0;
-  }
-
-  a.back {
-    display: block;
-    margin-top: 2.5rem;
-    color: var(--ink-soft);
-    text-decoration: none;
-    font-size: 0.85rem;
-    letter-spacing: 0.04em;
-    transition: color 0.2s ease;
-  }
-
-  a.back:hover {
-    color: var(--stamp);
-  }
-
-  a.back::before {
-    content: "← ";
+  @media (max-width:640px){
+    .title h1{font-size:22vw}
+    .content{padding:.8rem .95rem}
+    .type{font-size:.72rem;line-height:1.45}
+    .quill{font-size:1.15rem}
+    .chips i{width:20px;height:27px}
   }
 </style>
 </head>
 <body>
-  <main>
-    <div class="stamp">試</div>
-    <h1>lab</h1>
-    <p class="tagline">experiments, trials, things being taken apart.</p>
-    <span class="status">coming soon</span>
-    <a class="back" href="/">back to the entrance</a>
-  </main>
+
+<!-- turbulence-displaced edges: four seeds so no two scraps tear alike -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="torn1" x="-12%" y="-12%" width="124%" height="124%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.014 0.05" numOctaves="4" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="13" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="torn2" x="-12%" y="-12%" width="124%" height="124%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.02 0.04" numOctaves="4" seed="23" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="11" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="torn3" x="-12%" y="-12%" width="124%" height="124%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.011 0.06" numOctaves="5" seed="41" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="15" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="torn4" x="-12%" y="-12%" width="124%" height="124%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.025 0.035" numOctaves="3" seed="88" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="10" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<div class="bar">
+  <a class="back" href="/">geri</a>
+  <button class="scatter" id="scatter" type="button">dağıt</button>
+</div>
+
+<div class="title" aria-hidden="true">
+  <h1>lab</h1>
+  <p>deneyler</p>
+</div>
+
+<div id="board"></div>
+
+<p class="hint" id="hint">parçaları sürükle · hepsi serbest</p>
+
+<script>
+/* =====================================================================
+   Kesme tahtası: yırtık kâğıt parçaları, serbestçe sürüklenir.
+
+   Mekanik Jackie Zhang'in portfolyosundaki (jackiezhang.co.za) kolaj
+   dilinden alındı — yırtık kenarlar, hafif açılar, doğal üst üste binme.
+   Not: oradaki parçalar aslında sürüklenmiyor, dizilim statik; sürükleme
+   buraya eklendi.
+
+   Yeni parça eklemek: aşağıdaki listeye tek nesne ekle. x/y birer oran
+   (0-1) — ekran boyutundan bağımsız yerleşsin diye.
+   ===================================================================== */
+const SCRAPS = [
+  { x:.17, y:.20, r:-5.5, w:280, tint:'#F4EBD6', torn:'torn1', html:
+    `<p class="label">deneme 01</p>
+     <p class="type">Bu bir kesme tahtası.<br>Parçaları istediğin gibi<br>dağıtabilirsin.</p>` },
+
+  { x:.60, y:.14, r:4,    w:250, tint:'#EFE4C6', torn:'torn2', html:
+    `<p class="quill">her şey<br>hâlâ <span class="shu">taslak</span></p>` },
+
+  { x:.68, y:.52, r:-3,   w:300, tint:'#F7F2E4', torn:'torn3', html:
+    `<p class="label">plaka · 03</p>
+     ${plate()}
+     <p class="caption">yer tutucu görsel</p>` },
+
+  { x:.13, y:.58, r:6,    w:236, tint:'#E6DBBE', torn:'torn4', html:
+    `<p class="label">palet</p>
+     <div class="chips">
+       <i style="background:#C6442B"></i><i style="background:#E9E1CE"></i>
+       <i style="background:#43301F"></i><i style="background:#8A7857"></i>
+       <i style="background:#F6F0DE"></i>
+     </div>` },
+
+  { x:.40, y:.68, r:-7,   w:266, tint:'#F2E9D2', torn:'torn2', html:
+    `<p class="label">not</p>
+     <p class="type">z-index sürükleyince<br>öne fırlıyor —<br>üst üste binmeler<br>kendiliğinden.</p>` },
+
+  { x:.44, y:.34, r:2.5,  w:220, tint:'#EDE7D4', torn:'torn1', html:
+    `<p class="type"><span class="shu">const</span> lab = {<br>&nbsp;&nbsp;durum: <span class="shu">'açık'</span>,<br>&nbsp;&nbsp;kural: <span class="shu">yok</span><br>}</p>` },
+];
+
+/* a self-contained placeholder plate — no external assets */
+function plate(){
+  return `<svg class="plate" viewBox="0 0 300 190" xmlns="http://www.w3.org/2000/svg">
+    <rect width="300" height="190" fill="#E3D8BC"/>
+    <circle cx="222" cy="52" r="26" fill="none" stroke="#C6442B" stroke-opacity=".62" stroke-width="3"/>
+    <path d="M18 158 L74 104 L108 132 L158 74 L196 122 L246 88 L282 124"
+          fill="none" stroke="#211B14" stroke-opacity=".62" stroke-width="4"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M18 172 L282 172" stroke="#211B14" stroke-opacity=".18" stroke-width="2"/>
+  </svg>`;
+}
+
+const board = document.getElementById('board');
+const hint  = document.getElementById('hint');
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let top_ = 100;                    /* running z-index for the last-touched scrap */
+const cards = [];
+
+SCRAPS.forEach((s, i) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.setProperty('--w', s.w + 'px');
+  card.style.setProperty('--r', s.r + 'deg');
+  card.style.setProperty('--tint', s.tint);
+  card.style.setProperty('--torn', 'url(#' + s.torn + ')');
+  card.style.zIndex = ++top_;
+  card.innerHTML = `<div class="tilt"><div class="paper"></div><div class="content">${s.html}</div></div>`;
+  board.appendChild(card);
+  cards.push({ el:card, base:s, x:0, y:0, r:s.r });
+});
+
+/* ---- placement: ratios → pixels, clamped so nothing hides off-screen ----
+   the margin keeps the torn bleed (.paper sits at inset:-11px, and the
+   filter widens it further) inside the viewport, so an edge never reads
+   as a straight cut ---------------------------------------------------- */
+const EDGE = 16;
+function clampX(c, x){ return Math.min(Math.max(EDGE, innerWidth  - c.el.offsetWidth  - EDGE), Math.max(EDGE, x)); }
+function clampY(c, y){ return Math.min(Math.max(EDGE, innerHeight - c.el.offsetHeight - EDGE), Math.max(EDGE, y)); }
+
+function place(c, rx, ry){
+  c.x = clampX(c, rx * innerWidth  - c.el.offsetWidth/2);
+  c.y = clampY(c, ry * innerHeight - c.el.offsetHeight/2);
+  draw(c);
+}
+function draw(c){
+  c.el.style.setProperty('--x', c.x.toFixed(1) + 'px');
+  c.el.style.setProperty('--y', c.y.toFixed(1) + 'px');
+}
+function layout(){ cards.forEach(c => place(c, c.base.x, c.base.y)); }
+
+/* keep everything reachable when the window changes size */
+addEventListener('resize', () => {
+  cards.forEach(c => { c.x = clampX(c, c.x); c.y = clampY(c, c.y); draw(c); });
+});
+
+/* ------------------------------- drag: one path for mouse, touch, pen */
+let drag = null;
+board.addEventListener('pointerdown', e => {
+  const el = e.target.closest('.card');
+  if(!el || e.button !== 0) return;
+  const c = cards.find(k => k.el === el);
+  if(!c) return;
+  e.preventDefault();
+  try{ el.setPointerCapture(e.pointerId); }catch(err){}
+
+  hint.classList.add('gone');
+  el.style.zIndex = ++top_;               /* picked up ⇒ on top of the pile */
+  el.classList.add('held');
+  if(!REDUCED){
+    el.style.setProperty('--r', (c.r * 0.3).toFixed(2) + 'deg');  /* lifts flat */
+    el.style.setProperty('--s', '1.04');
+  }
+  drag = { c, id:e.pointerId, dx:e.clientX - c.x, dy:e.clientY - c.y };
+});
+
+board.addEventListener('pointermove', e => {
+  if(!drag || e.pointerId !== drag.id) return;
+  const c = drag.c;
+  c.x = clampX(c, e.clientX - drag.dx);
+  c.y = clampY(c, e.clientY - drag.dy);
+  draw(c);
+});
+
+function drop(e){
+  if(!drag || (e && e.pointerId !== drag.id)) return;
+  const c = drag.c; drag = null;
+  c.el.classList.remove('held');
+  c.el.style.setProperty('--r', c.r + 'deg');   /* settles back down */
+  c.el.style.setProperty('--s', '1');
+}
+board.addEventListener('pointerup', drop);
+board.addEventListener('pointercancel', drop);
+board.addEventListener('dragstart', e => e.preventDefault());
+
+/* ------------------------------------------------------ scatter again */
+document.getElementById('scatter').addEventListener('click', () => {
+  hint.classList.add('gone');
+  cards.forEach(c => {
+    const rx = 0.12 + Math.random()*0.76;
+    const ry = 0.16 + Math.random()*0.66;
+    c.r = (Math.random()*16 - 8);
+    c.el.style.setProperty('--r', c.r.toFixed(2) + 'deg');
+    c.el.style.zIndex = ++top_;
+    place(c, rx, ry);
+  });
+});
+
+/* offsetWidth needs a laid-out DOM, so place after the first paint */
+requestAnimationFrame(layout);
+</script>
 </body>
 </html>
