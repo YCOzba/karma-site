@@ -23,17 +23,17 @@
   --base-font-weight: 700;
 
   /* the four that clash */
-  --acid: #d7ff3e; /* acid lime   */
-  --hot: #ff4fd8; /* hot magenta */
-  --volt: #2b17ff; /* electric blue */
-  --sun: #ff8a00; /* orange      */
+  --sky: #4da6ff; /* bright blue — the ground */
+  --red: #ff2e2e; /* red                      */
+  --volt: #1b2cff; /* deep electric blue      */
+  --sun: #ff8a00; /* orange                   */
 
-  --background: var(--acid);
+  --background: var(--sky);
   --secondary-background: #ffffff;
   --foreground: #000000;
-  --main-foreground: #000000;
+  --main-foreground: #ffffff;
 
-  --main: var(--hot);
+  --main: var(--red);
   --border: #000000;
   --ring: #000000;
   --overlay: rgb(0 0 0 / 0.8);
@@ -51,8 +51,8 @@
   --color-overlay: var(--overlay);
   --color-ring: var(--ring);
 
-  --color-acid: var(--acid);
-  --color-hot: var(--hot);
+  --color-sky: var(--sky);
+  --color-red: var(--red);
   --color-volt: var(--volt);
   --color-sun: var(--sun);
 

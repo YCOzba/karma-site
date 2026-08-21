@@ -25,7 +25,7 @@ export default function App() {
         >
           ← GERİ
         </a>
-        <Badge className="rotate-3 border-4 bg-sun px-3 py-1 text-sm font-black shadow-hard sm:text-base">
+        <Badge className="rotate-3 border-4 bg-sun px-3 py-1 text-sm font-black text-black shadow-hard sm:text-base">
           BOZUK KÖŞE
         </Badge>
       </div>
@@ -35,7 +35,7 @@ export default function App() {
         <h1 className="text-[19vw] leading-[0.76] font-black tracking-tighter uppercase sm:text-[15vw]">
           <span className="block -rotate-2">ANTİ</span>
           <span
-            className="-mt-[0.06em] block translate-x-2 rotate-1 text-hot sm:translate-x-10"
+            className="-mt-[0.06em] block translate-x-2 rotate-1 text-red sm:translate-x-10"
             style={{ WebkitTextStroke: '3px #000' }}
           >
             ESTETİK
@@ -46,10 +46,10 @@ export default function App() {
           <Badge className="-rotate-2 border-4 bg-volt px-3 py-1 text-sm font-black text-white shadow-hard">
             DENEY #01
           </Badge>
-          <Badge className="rotate-2 border-4 bg-white px-3 py-1 text-sm font-black shadow-hard">
+          <Badge className="rotate-2 border-4 bg-white px-3 py-1 text-sm font-black text-black shadow-hard">
             NEOBRUTALIZM
           </Badge>
-          <Badge className="-rotate-1 border-4 bg-sun px-3 py-1 text-sm font-black shadow-hard">
+          <Badge className="-rotate-1 border-4 bg-sun px-3 py-1 text-sm font-black text-black shadow-hard">
             GRİD YOK
           </Badge>
         </div>
@@ -57,7 +57,7 @@ export default function App() {
         {/* intro, deliberately knocked off the grid */}
         <div className="mt-10 max-w-2xl -rotate-1 border-4 border-border bg-white p-5 shadow-hardlg sm:ml-12 sm:p-7">
           <p className="text-lg leading-snug font-bold sm:text-2xl">
-            Burası sitenin <span className="bg-hot px-1 text-white">dağınık köşesi</span>.
+            Burası sitenin <span className="bg-red px-1 text-white">dağınık köşesi</span>.
             Girişteki sakin şoji kapısının tam tersi: kalın siyah çerçeveler,
             sert gölgeler, birbiriyle kavga eden renkler ve bilerek bozulmuş
             bir grid. Buradaki hiçbir şey uyumlu olmaya çalışmıyor.
@@ -96,7 +96,7 @@ export default function App() {
             </Button>
           </CardContent>
           <CardFooter>
-            <span className="border-4 border-border bg-acid px-3 py-1 text-base font-black">
+            <span className="border-4 border-border bg-sun px-3 py-1 text-base font-black">
               {clicks} kez basıldı
             </span>
           </CardFooter>
@@ -140,27 +140,31 @@ export default function App() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
-            {['ham', 'çirkin', 'yüksek sesli', 'düzeltilmedi', 'taslak'].map(
-              (t, i) => (
-                <Badge
-                  key={t}
-                  className="border-4 px-3 py-1 text-sm font-black shadow-hard"
-                  style={{
-                    transform: `rotate(${(i % 2 ? 1 : -1) * (2 + i)}deg)`,
-                    background: ['#d7ff3e', '#ff4fd8', '#ffffff', '#ff8a00', '#d7ff3e'][i],
-                    color: '#000',
-                  }}
-                >
-                  {t}
-                </Badge>
-              ),
-            )}
+            {[
+              { t: 'ham', bg: '#ff8a00', fg: '#000' },
+              { t: 'çirkin', bg: '#ff2e2e', fg: '#fff' },
+              { t: 'yüksek sesli', bg: '#ffffff', fg: '#000' },
+              { t: 'düzeltilmedi', bg: '#4da6ff', fg: '#000' },
+              { t: 'taslak', bg: '#ff8a00', fg: '#000' },
+            ].map(({ t, bg, fg }, i) => (
+              <Badge
+                key={t}
+                className="border-4 px-3 py-1 text-sm font-black shadow-hard"
+                style={{
+                  transform: `rotate(${(i % 2 ? 1 : -1) * (2 + i)}deg)`,
+                  background: bg,
+                  color: fg,
+                }}
+              >
+                {t}
+              </Badge>
+            ))}
           </CardContent>
         </Card>
       </main>
 
       {/* ---- a strip that runs off the edge on purpose ---- */}
-      <div className="mt-24 -mr-10 -ml-10 -rotate-1 border-y-4 border-border bg-hot py-4">
+      <div className="mt-24 -mr-10 -ml-10 -rotate-1 border-y-4 border-border bg-red py-4">
         <p className="text-center text-3xl font-black tracking-tight whitespace-nowrap text-white uppercase sm:text-5xl">
           ★ DÜZGÜN DEĞİL ★ DÜZELTİLMEYECEK ★ DÜZGÜN DEĞİL ★ DÜZELTİLMEYECEK ★
         </p>
@@ -170,7 +174,7 @@ export default function App() {
         <p className="text-sm font-bold uppercase">
           karma · anti — bileşenler{' '}
           <a
-            className="bg-black px-1 text-acid underline"
+            className="bg-black px-1 text-sun underline"
             href="https://github.com/ekmas/neobrutalism-components"
             target="_blank"
             rel="noreferrer"
