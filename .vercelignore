@@ -1,0 +1,4 @@
+# Source for framework experiments is built locally and committed as
+# output (see README). The source folders themselves don't need to be
+# uploaded or served — /anti is what ships, /anti-src is how it's made.
+anti-src/
