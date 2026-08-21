@@ -1,138 +1,245 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>sketchbook — coming soon</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sketchbook — karma</title>
 <style>
-  :root {
-    --paper: #f2e9d8;
-    --paper-edge: #e7d9bc;
-    --ink: #2b2420;
-    --ink-soft: #5c5145;
-    --stamp: #a13d2f;
+  :root{
+    --paper:#E9E1CE;
+    --paper-lit:#F6F0DE;
+    --paper-dim:#DCD0B4;
+    --wood:#43301F;
+    --wood-hi:#5C4430;
+    --ink:#211B14;
+    --shu:#C6442B;
   }
-
-  * { box-sizing: border-box; }
-
-  html, body {
-    height: 100%;
-    margin: 0;
-  }
-
-  body {
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
     background:
-      radial-gradient(ellipse at top left, rgba(255,255,255,0.25), transparent 60%),
-      var(--paper);
-    color: var(--ink);
-    font-family: "Iowan Old Style", "Palatino Linotype", Georgia, "Noto Serif", serif;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
+      radial-gradient(120% 90% at 50% 30%, #241d15, #14100b 70%);
+    color:var(--paper-lit);
+    font-family:"Yu Mincho","Hiragino Mincho ProN",Georgia,"Times New Roman",serif;
+    display:flex;flex-direction:column;align-items:center;
+    min-height:100%;
+    padding:1.6rem 1rem 2.4rem;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
   }
 
-  /* subtle paper grain */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.06;
-    background-image:
-      repeating-linear-gradient(0deg, var(--ink) 0px, transparent 1px, transparent 2px),
-      repeating-linear-gradient(90deg, var(--ink) 0px, transparent 1px, transparent 2px);
-    background-size: 3px 3px;
-    mix-blend-mode: multiply;
+  header{
+    width:100%;max-width:520px;
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:1.4rem;
+  }
+  a.back{
+    font-family:system-ui,sans-serif;
+    font-size:.78rem;letter-spacing:.1em;
+    color:#c9bb9a;text-decoration:none;
+    display:flex;align-items:center;gap:.4em;
+    transition:color 200ms ease;
+  }
+  a.back:hover{color:var(--paper-lit)}
+  a.back::before{content:"←"}
+
+  .counter{
+    font-family:system-ui,sans-serif;
+    font-size:.75rem;letter-spacing:.12em;
+    color:#c9bb9a;
   }
 
-  /* deckled paper border */
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 14px;
-    pointer-events: none;
-    border: 1px solid var(--paper-edge);
-    box-shadow: inset 0 0 60px rgba(90, 70, 40, 0.12);
+  h1{
+    font-size:1.05rem;font-weight:400;font-style:italic;
+    letter-spacing:.06em;color:#e9ddc2;
+    margin-bottom:1.6rem;
   }
 
-  main {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    max-width: 32rem;
-    padding: 2rem;
+  /* ---------- the book ---------- */
+  .stage{
+    perspective:2400px;
+    width:min(88vw,380px);
+    aspect-ratio:7/9;
+    position:relative;
+  }
+  .stage::after{ /* contact shadow on the desk */
+    content:"";position:absolute;left:6%;right:6%;bottom:-22px;height:26px;
+    background:radial-gradient(50% 100% at 50% 0%, rgba(0,0,0,.5), rgba(0,0,0,0) 75%);
+    filter:blur(2px);
   }
 
-  .stamp {
-    width: 3.25rem;
-    height: 3.25rem;
-    margin: 0 auto 1.75rem;
-    border: 2px solid var(--stamp);
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--stamp);
-    font-size: 1.4rem;
-    transform: rotate(-4deg);
-    opacity: 0.85;
+  .book{
+    position:absolute;inset:0;
+  }
+  .spine{
+    position:absolute;left:-8px;top:2%;bottom:2%;width:14px;
+    background:linear-gradient(90deg,var(--wood),var(--wood-hi) 60%,var(--wood));
+    border-radius:6px 0 0 6px;
+    box-shadow:inset 0 0 8px rgba(0,0,0,.5), -2px 4px 10px rgba(0,0,0,.4);
   }
 
-  h1 {
-    font-size: 2.1rem;
-    font-weight: 400;
-    letter-spacing: 0.04em;
-    margin: 0 0 0.6rem;
-    font-style: italic;
+  .page{
+    position:absolute;inset:0;
+    transform-style:preserve-3d;
+    transform-origin:left center;
+    transition:transform 720ms cubic-bezier(.61,.06,.2,1);
+    will-change:transform;
+  }
+  .page .face{
+    position:absolute;inset:0;
+    backface-visibility:hidden;
+    border-radius:2px 10px 10px 2px;
+    box-shadow:2px 4px 18px rgba(0,0,0,.35), inset 0 0 0 1px rgba(33,27,20,.12);
+    overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .page .face-front{
+    background:var(--paper-lit);
+  }
+  .page .face-front img{
+    width:100%;height:100%;object-fit:cover;display:block;
+  }
+  .page .face-back{
+    transform:rotateY(180deg);
+    background:
+      repeating-linear-gradient(90deg, rgba(67,48,31,.05) 0 1px, transparent 1px 26px),
+      var(--paper-dim);
+  }
+  .page .face::before{ /* faint edge shade near the spine, sells the curvature */
+    content:"";position:absolute;left:0;top:0;bottom:0;width:26px;
+    background:linear-gradient(90deg, rgba(0,0,0,.16), rgba(0,0,0,0));
+    pointer-events:none;
   }
 
-  p.tagline {
-    color: var(--ink-soft);
-    font-size: 1rem;
-    letter-spacing: 0.02em;
-    margin: 0 0 2.5rem;
-    line-height: 1.6;
+  /* invisible click zones on the topmost page */
+  .zones{position:absolute;inset:0;display:flex;z-index:50}
+  .zone{flex:1;background:none;border:0;cursor:pointer;padding:0}
+  .zone:focus-visible{outline:2px solid var(--shu);outline-offset:-4px}
+
+  .chevron{
+    position:absolute;top:50%;transform:translateY(-50%);
+    width:30px;height:30px;border-radius:50%;
+    background:rgba(20,16,11,.55);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--paper-lit);font-size:.95rem;
+    opacity:0;transition:opacity 200ms ease;
+    pointer-events:none;
+    z-index:60;
+  }
+  .chevron.left{left:-15px}
+  .chevron.right{right:-15px}
+  .stage:hover .chevron.show{opacity:1}
+  .chevron.hidden{display:none}
+
+  footer.hint{
+    margin-top:1.6rem;
+    font-family:system-ui,sans-serif;font-size:.7rem;letter-spacing:.08em;
+    color:#8a7857;text-align:center;max-width:340px;
   }
 
-  .status {
-    display: inline-block;
-    font-size: 0.75rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    border-top: 1px solid var(--paper-edge);
-    border-bottom: 1px solid var(--paper-edge);
-    padding: 0.6rem 0;
+  @media (prefers-reduced-motion:reduce){
+    .page{transition:transform 1ms linear}
   }
 
-  a.back {
-    display: block;
-    margin-top: 2.5rem;
-    color: var(--ink-soft);
-    text-decoration: none;
-    font-size: 0.85rem;
-    letter-spacing: 0.04em;
-    transition: color 0.2s ease;
-  }
-
-  a.back:hover {
-    color: var(--stamp);
-  }
-
-  a.back::before {
-    content: "← ";
+  @media (max-width:420px){
+    footer.hint{display:none}
   }
 </style>
 </head>
 <body>
-  <main>
-    <div class="stamp">画</div>
-    <h1>sketchbook</h1>
-    <p class="tagline">loose sketches, small studies, things not yet finished.</p>
-    <span class="status">coming soon</span>
-    <a class="back" href="/">back to the entrance</a>
-  </main>
+
+  <header>
+    <a class="back" href="/">geri</a>
+    <span class="counter" id="counter">1 / 5</span>
+  </header>
+
+  <h1>eskiz defteri</h1>
+
+  <div class="stage" id="stage">
+    <div class="spine" aria-hidden="true"></div>
+    <div class="book" id="book"></div>
+    <div class="chevron left" id="chevLeft" aria-hidden="true">‹</div>
+    <div class="chevron right show" id="chevRight" aria-hidden="true">›</div>
+    <div class="zones">
+      <button class="zone" id="zonePrev" aria-label="Önceki sayfa"></button>
+      <button class="zone" id="zoneNext" aria-label="Sonraki sayfa"></button>
+    </div>
+  </div>
+
+  <footer class="hint">kenarlara tıkla, ok tuşlarını kullan ya da kaydır</footer>
+
+<script>
+  // ---------- sayfaları buraya ekle: yeni bir çizim eklemek için tek satır yeter ----------
+  const PAGES = [
+    { src: 'drawings/01.svg', alt: 'Eskiz 01' },
+    { src: 'drawings/02.svg', alt: 'Eskiz 02' },
+    { src: 'drawings/03.svg', alt: 'Eskiz 03' },
+    { src: 'drawings/04.svg', alt: 'Eskiz 04' },
+    { src: 'drawings/05.svg', alt: 'Boş sayfa' },
+  ];
+
+  const book = document.getElementById('book');
+  const counter = document.getElementById('counter');
+  const chevLeft = document.getElementById('chevLeft');
+  const chevRight = document.getElementById('chevRight');
+
+  let current = 0;
+  const total = PAGES.length;
+
+  PAGES.forEach((p, i) => {
+    const page = document.createElement('div');
+    page.className = 'page';
+    page.style.zIndex = total - i;
+    page.innerHTML = `
+      <div class="face face-front"><img src="${p.src}" alt="${p.alt}" draggable="false"></div>
+      <div class="face face-back"></div>
+    `;
+    book.appendChild(page);
+  });
+
+  const pageEls = Array.from(book.children);
+
+  function render(){
+    pageEls.forEach((el, i) => {
+      if(i < current){
+        el.style.transform = 'rotateY(-180deg)';
+        el.style.zIndex = i;
+      } else {
+        el.style.transform = 'rotateY(0deg)';
+        el.style.zIndex = total - i;
+      }
+    });
+    counter.textContent = `${current + 1} / ${total}`;
+    chevLeft.classList.toggle('show', current > 0);
+    chevLeft.classList.toggle('hidden', current === 0);
+    chevRight.classList.toggle('show', current < total - 1);
+    chevRight.classList.toggle('hidden', current === total - 1);
+  }
+
+  function next(){ if(current < total - 1){ current++; render(); } }
+  function prev(){ if(current > 0){ current--; render(); } }
+
+  document.getElementById('zoneNext').addEventListener('click', next);
+  document.getElementById('zonePrev').addEventListener('click', prev);
+
+  window.addEventListener('keydown', e => {
+    if(e.key === 'ArrowRight' || e.key === 'ArrowDown'){ e.preventDefault(); next(); }
+    if(e.key === 'ArrowLeft'  || e.key === 'ArrowUp'){   e.preventDefault(); prev(); }
+  });
+
+  // dokunmatik kaydırma
+  const stage = document.getElementById('stage');
+  let touchX = null;
+  stage.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, {passive:true});
+  stage.addEventListener('touchend', e => {
+    if(touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if(dx < -40) next();
+    else if(dx > 40) prev();
+    touchX = null;
+  }, {passive:true});
+
+  render();
+</script>
 </body>
 </html>

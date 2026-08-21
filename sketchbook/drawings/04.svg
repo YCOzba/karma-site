@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 900">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F6F0DE"/>
+      <stop offset="100%" stop-color="#DCD0B4"/>
+    </linearGradient>
+    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0.13  0 0 0 0 0.1  0 0 0 0 0.08  0 0 0 0.03 0"/></filter>
+  </defs>
+  <rect width="700" height="900" fill="url(#paper)"/>
+  <rect width="700" height="900" filter="url(#grain)"/>
+  <rect x="26" y="26" width="648" height="848" fill="none" stroke="#211B14" stroke-opacity=".14" stroke-width="1.5"/>
+  <path d="M350 620 C350 500 350 420 350 320" fill="none" stroke="#211B14" stroke-opacity=".75" stroke-width="3" stroke-linecap="round"/>
+  <path d="M350 560 C300 520 260 520 230 470" fill="none" stroke="#211B14" stroke-opacity=".7" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M350 500 C400 460 440 460 470 410" fill="none" stroke="#211B14" stroke-opacity=".7" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M350 420 C310 390 290 360 280 320" fill="none" stroke="#C6442B" stroke-opacity=".65" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="350" y="230" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="17" letter-spacing="4" fill="#6a5c44">SKETCH No.</text>
+  <text x="662" y="862" text-anchor="end" font-family="Georgia, serif" font-size="20" fill="#211B14" fill-opacity=".55">04</text>
+</svg>
