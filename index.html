@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>karma</title>
+<style>
+  :root{
+    --paper:#E9E1CE;
+    --paper-lit:#F6F0DE;
+    --paper-dim:#DCD0B4;
+    --wood:#43301F;
+    --wood-hi:#5C4430;
+    --ink:#211B14;
+    --shu:#C6442B;
+    --slide:1700ms;
+    --ease:cubic-bezier(.72,0,.16,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:#0f0c08;
+    color:var(--ink);
+    font-family:"Yu Mincho","Hiragino Mincho ProN",Georgia,"Times New Roman",serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- the room behind the doors (the landing) ---------- */
+  .room{
+    position:fixed;inset:0;
+    display:grid;place-items:center;
+    background:
+      radial-gradient(120% 90% at 50% 40%, var(--paper-lit), var(--paper) 55%, var(--paper-dim) 100%);
+    padding:2rem;
+  }
+  .seam-light{
+    position:fixed;top:0;bottom:0;left:50%;width:min(42vw,520px);
+    transform:translateX(-50%);
+    background:radial-gradient(60% 100% at 50% 50%, rgba(255,247,225,.9), rgba(255,247,225,0) 72%);
+    pointer-events:none;opacity:0;transition:opacity 900ms ease;
+  }
+  body.opening .seam-light{opacity:1}
+  body.open .seam-light{opacity:0}
+
+  .content{
+    position:relative;z-index:1;
+    text-align:center;max-width:34rem;
+    opacity:0;transform:translateY(14px);
+    transition:opacity 900ms ease 650ms, transform 900ms ease 650ms;
+  }
+  body.open .content{opacity:1;transform:none}
+
+  .eyebrow{
+    font-family:system-ui,sans-serif;
+    font-size:.78rem;letter-spacing:.34em;text-transform:uppercase;
+    color:#7c6a4e;display:flex;align-items:center;justify-content:center;gap:.7em;
+    margin-bottom:1.4rem;
+  }
+  .eyebrow b{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:1.15rem;color:var(--shu);font-weight:400;letter-spacing:0}
+  h1{
+    font-size:clamp(3.4rem,14vw,7rem);
+    font-weight:400;line-height:.9;letter-spacing:-.01em;color:var(--ink);
+  }
+  .tagline{
+    font-family:system-ui,sans-serif;
+    margin-top:1.1rem;color:#6a5c44;font-size:1rem;letter-spacing:.02em;
+  }
+
+  nav{margin-top:2.8rem;display:flex;flex-direction:column;gap:.15rem}
+  nav a{
+    position:relative;
+    font-size:1.5rem;color:var(--ink);text-decoration:none;
+    padding:.55rem 0;
+    display:flex;align-items:baseline;justify-content:center;gap:.6rem;
+    transition:color 220ms ease;
+  }
+  nav a .jp{font-size:.9rem;color:#9a8763;font-family:system-ui,sans-serif;letter-spacing:.15em}
+  nav a::after{
+    content:"";position:absolute;left:50%;bottom:.35rem;height:1.5px;width:0;
+    background:var(--shu);transform:translateX(-50%);transition:width 260ms var(--ease);
+  }
+  nav a:hover,nav a:focus-visible{color:var(--shu);outline:none}
+  nav a:hover::after,nav a:focus-visible::after{width:3.2rem}
+
+  .mark{
+    position:fixed;left:50%;bottom:1.6rem;transform:translateX(-50%);
+    font-family:system-ui,sans-serif;font-size:.72rem;letter-spacing:.28em;
+    text-transform:uppercase;color:#8a7857;z-index:1;
+    opacity:0;transition:opacity 700ms ease 1100ms;
+  }
+  body.open .mark{opacity:1}
+
+  /* ---------- the doors ---------- */
+  .gate{position:fixed;inset:0;z-index:5;display:flex}
+  .panel{
+    position:relative;width:50%;height:100%;
+    background:
+      linear-gradient(90deg, rgba(0,0,0,.14), rgba(0,0,0,0) 8%, rgba(0,0,0,0) 92%, rgba(0,0,0,.14)),
+      repeating-linear-gradient(0deg, var(--wood-hi) 0 1px, transparent 1px 6px),
+      linear-gradient(180deg, var(--wood-hi), var(--wood) 40%, #3a2819);
+    box-shadow:inset 0 0 60px rgba(0,0,0,.45);
+    transition:transform var(--slide) var(--ease);
+    will-change:transform;
+  }
+  .panel::before{ /* paper inside the wooden frame */
+    content:"";position:absolute;inset:16px;border-radius:1px;
+    background:
+      radial-gradient(120% 80% at var(--glow,50%) 50%, var(--paper-lit), var(--paper) 60%, var(--paper-dim)),
+      repeating-linear-gradient(0deg,  rgba(67,48,31,.9) 0 2px, transparent 2px 76px),
+      repeating-linear-gradient(90deg, rgba(67,48,31,.9) 0 2px, transparent 2px 58px);
+    background-blend-mode:normal,normal,normal;
+    box-shadow:inset 0 0 0 3px var(--wood), inset 0 0 34px rgba(120,96,60,.35);
+  }
+  .panel::after{ /* bottom solid rail (koshita) */
+    content:"";position:absolute;left:16px;right:16px;bottom:16px;height:16%;
+    background:linear-gradient(180deg,var(--wood-hi),var(--wood));
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.06), inset 0 0 0 3px var(--wood);
+  }
+  .panel.left{--glow:88%}
+  .panel.right{--glow:12%}
+  body.open .panel.left{transform:translateX(-100%)}
+  body.open .panel.right{transform:translateX(100%)}
+
+  /* meeting stiles + warm gap when closed */
+  .panel.left{border-right:3px solid #2c1e12}
+  .panel.right{border-left:3px solid #2c1e12}
+
+  /* the enter prompt */
+  .enter{
+    position:absolute;left:50%;bottom:14%;transform:translateX(-50%);
+    display:flex;flex-direction:column;align-items:center;gap:.9rem;
+    background:none;border:0;cursor:pointer;color:#f4ecd8;z-index:6;
+    transition:opacity 600ms ease;
+  }
+  body.opening .enter,body.open .enter{opacity:0;pointer-events:none}
+  .seal{
+    width:64px;height:64px;border-radius:50%;
+    display:grid;place-items:center;
+    background:var(--shu);color:#fff;
+    font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:1.7rem;
+    box-shadow:0 8px 30px rgba(0,0,0,.4);
+    animation:breathe 2.6s ease-in-out infinite;
+  }
+  .enter span{
+    font-family:system-ui,sans-serif;font-size:.72rem;letter-spacing:.4em;
+    text-transform:uppercase;color:#e9ddc2;padding-left:.4em;
+  }
+  @keyframes breathe{
+    0%,100%{transform:scale(1);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+    50%{transform:scale(1.06);box-shadow:0 8px 44px rgba(198,68,43,.5)}
+  }
+
+  body.open .gate{pointer-events:none}
+
+  @media (prefers-reduced-motion:reduce){
+    .panel{transition:opacity 400ms ease}
+    body.open .panel{transform:none;opacity:0}
+    .seal{animation:none}
+  }
+</style>
+</head>
+<body>
+
+  <div class="seam-light" aria-hidden="true"></div>
+
+  <main class="room">
+    <div class="content">
+      <p class="eyebrow"><b>雑</b> karma içerik</p>
+      <h1>karma</h1>
+      <p class="tagline">tek kapı, arkasında farklı odalar</p>
+      <nav aria-label="Odalar">
+        <a href="/sketchbook/">eskiz defteri <span class="jp">sketchbook</span></a>
+        <a href="/lab/">deneyler <span class="jp">lab</span></a>
+        <a href="/gazete/">gazete <span class="jp">gazete</span></a>
+      </nav>
+    </div>
+    <p class="mark">bir domain · çok deney</p>
+  </main>
+
+  <div class="gate" aria-hidden="false">
+    <div class="panel left"></div>
+    <div class="panel right"></div>
+    <button class="enter" id="enter" aria-label="Gir">
+      <span class="seal" aria-hidden="true">開</span>
+      <span>gir</span>
+    </button>
+  </div>
+
+<script>
+  const body = document.body;
+  const gate = document.querySelector('.gate');
+  let opened = false;
+
+  function open(){
+    if(opened) return;
+    opened = true;
+    body.classList.add('opening');
+    requestAnimationFrame(()=> body.classList.add('open'));
+    setTimeout(()=> gate.setAttribute('aria-hidden','true'), 400);
+  }
+
+  document.getElementById('enter').addEventListener('click', open);
+  // klavye: Enter / Space ile de aç
+  window.addEventListener('keydown', e=>{
+    if(!opened && (e.key==='Enter' || e.key===' ')){ e.preventDefault(); open(); }
+  });
+</script>
+</body>
+</html>
