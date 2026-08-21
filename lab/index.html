@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>lab — coming soon</title>
+<style>
+  :root {
+    --paper: #f2e9d8;
+    --paper-edge: #e7d9bc;
+    --ink: #2b2420;
+    --ink-soft: #5c5145;
+    --stamp: #a13d2f;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse at top left, rgba(255,255,255,0.25), transparent 60%),
+      var(--paper);
+    color: var(--ink);
+    font-family: "Iowan Old Style", "Palatino Linotype", Georgia, "Noto Serif", serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* subtle paper grain */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image:
+      repeating-linear-gradient(0deg, var(--ink) 0px, transparent 1px, transparent 2px),
+      repeating-linear-gradient(90deg, var(--ink) 0px, transparent 1px, transparent 2px);
+    background-size: 3px 3px;
+    mix-blend-mode: multiply;
+  }
+
+  /* deckled paper border */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 14px;
+    pointer-events: none;
+    border: 1px solid var(--paper-edge);
+    box-shadow: inset 0 0 60px rgba(90, 70, 40, 0.12);
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 32rem;
+    padding: 2rem;
+  }
+
+  .stamp {
+    width: 3.25rem;
+    height: 3.25rem;
+    margin: 0 auto 1.75rem;
+    border: 2px solid var(--stamp);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--stamp);
+    font-size: 1.4rem;
+    transform: rotate(3deg);
+    opacity: 0.85;
+  }
+
+  h1 {
+    font-size: 2.1rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    margin: 0 0 0.6rem;
+    font-style: italic;
+  }
+
+  p.tagline {
+    color: var(--ink-soft);
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    margin: 0 0 2.5rem;
+    line-height: 1.6;
+  }
+
+  .status {
+    display: inline-block;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--paper-edge);
+    border-bottom: 1px solid var(--paper-edge);
+    padding: 0.6rem 0;
+  }
+
+  a.back {
+    display: block;
+    margin-top: 2.5rem;
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    transition: color 0.2s ease;
+  }
+
+  a.back:hover {
+    color: var(--stamp);
+  }
+
+  a.back::before {
+    content: "← ";
+  }
+</style>
+</head>
+<body>
+  <main>
+    <div class="stamp">試</div>
+    <h1>lab</h1>
+    <p class="tagline">experiments, trials, things being taken apart.</p>
+    <span class="status">coming soon</span>
+    <a class="back" href="/">back to the entrance</a>
+  </main>
+</body>
+</html>
