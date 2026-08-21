@@ -1,16 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 900">
+<svg xmlns="http://www.w3.org/2000/svg" width="1760" height="1240" viewBox="0 0 1760 1240">
   <defs>
-    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#F6F0DE"/>
-      <stop offset="100%" stop-color="#DCD0B4"/>
+    <linearGradient id="pg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0%" stop-color="#F7F1E0"/>
+      <stop offset="52%" stop-color="#EDE5D2"/>
+      <stop offset="100%" stop-color="#DFD3B8"/>
     </linearGradient>
-    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0.13  0 0 0 0 0.1  0 0 0 0 0.08  0 0 0 0.03 0"/></filter>
+    <radialGradient id="vig" cx="50%" cy="46%" r="72%">
+      <stop offset="60%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#3a2c18" stop-opacity=".13"/>
+    </radialGradient>
   </defs>
-  <rect width="700" height="900" fill="url(#paper)"/>
-  <rect width="700" height="900" filter="url(#grain)"/>
-  <rect x="26" y="26" width="648" height="848" fill="none" stroke="#211B14" stroke-opacity=".14" stroke-width="1.5"/>
-  <path d="M350 470 C350 400 420 400 420 470 C420 550 320 550 320 460 C320 350 460 350 460 470 C460 600 280 600 280 450"
-        fill="none" stroke="#211B14" stroke-opacity=".78" stroke-width="3" stroke-linecap="round"/>
-  <text x="350" y="230" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="17" letter-spacing="4" fill="#6a5c44">SKETCH No.</text>
-  <text x="662" y="862" text-anchor="end" font-family="Georgia, serif" font-size="20" fill="#211B14" fill-opacity=".55">01</text>
+
+  <rect width="1760" height="1240" fill="url(#pg)"/>
+
+  <!-- enso: one breath, opened across the gutter -->
+  <path d="M1012 372 C1224 388 1288 640 1128 812 C960 992 656 952 588 760
+           C520 568 700 404 906 424"
+        fill="none" stroke="#211B14" stroke-opacity=".8" stroke-width="15"
+        stroke-linecap="round"/>
+  <path d="M906 424 C838 432 786 452 748 482"
+        fill="none" stroke="#211B14" stroke-opacity=".34" stroke-width="9"
+        stroke-linecap="round"/>
+
+  <circle cx="1176" cy="352" r="27" fill="none" stroke="#C6442B" stroke-opacity=".62" stroke-width="6"/>
+
+  <text x="440" y="1074" text-anchor="middle" font-family="Georgia,'Times New Roman',serif"
+        font-size="27" letter-spacing="9" fill="#6a5c44" fill-opacity=".82">ENSO</text>
+
+  <text x="86" y="1168" font-family="Georgia,serif" font-size="30" fill="#211B14" fill-opacity=".4">2</text>
+  <text x="1674" y="1168" text-anchor="end" font-family="Georgia,serif" font-size="30" fill="#211B14" fill-opacity=".4">3</text>
+
+  <rect width="1760" height="1240" fill="url(#vig)"/>
 </svg>

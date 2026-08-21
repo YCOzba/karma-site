@@ -1,14 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 900">
+<svg xmlns="http://www.w3.org/2000/svg" width="1760" height="1240" viewBox="0 0 1760 1240">
   <defs>
-    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#F6F0DE"/>
-      <stop offset="100%" stop-color="#DCD0B4"/>
+    <linearGradient id="pg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0%" stop-color="#F7F1E0"/>
+      <stop offset="52%" stop-color="#EDE5D2"/>
+      <stop offset="100%" stop-color="#DFD3B8"/>
     </linearGradient>
-    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0.13  0 0 0 0 0.1  0 0 0 0 0.08  0 0 0 0.03 0"/></filter>
+    <radialGradient id="vig" cx="50%" cy="46%" r="72%">
+      <stop offset="60%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#3a2c18" stop-opacity=".13"/>
+    </radialGradient>
   </defs>
-  <rect width="700" height="900" fill="url(#paper)"/>
-  <rect width="700" height="900" filter="url(#grain)"/>
-  <rect x="26" y="26" width="648" height="848" fill="none" stroke="#211B14" stroke-opacity=".14" stroke-width="1.5"/>
-  <text x="350" y="450" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="26" fill="#211B14" fill-opacity=".4">boş sayfa</text>
-  <text x="662" y="862" text-anchor="end" font-family="Georgia, serif" font-size="20" fill="#211B14" fill-opacity=".55">05</text>
+
+  <rect width="1760" height="1240" fill="url(#pg)"/>
+
+  <text x="880" y="606" text-anchor="middle" font-family="Georgia,'Times New Roman',serif"
+        font-style="italic" font-size="44" fill="#211B14" fill-opacity=".3">boş sayfa</text>
+  <line x1="782" y1="668" x2="978" y2="668" stroke="#211B14" stroke-opacity=".16" stroke-width="3"/>
+
+  <text x="86" y="1168" font-family="Georgia,serif" font-size="30" fill="#211B14" fill-opacity=".4">10</text>
+  <text x="1674" y="1168" text-anchor="end" font-family="Georgia,serif" font-size="30" fill="#211B14" fill-opacity=".4">11</text>
+
+  <rect width="1760" height="1240" fill="url(#vig)"/>
 </svg>

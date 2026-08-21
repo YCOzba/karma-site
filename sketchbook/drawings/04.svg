@@ -1,18 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 900">
+<svg xmlns="http://www.w3.org/2000/svg" width="1760" height="1240" viewBox="0 0 1760 1240">
   <defs>
-    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#F6F0DE"/>
-      <stop offset="100%" stop-color="#DCD0B4"/>
+    <linearGradient id="pg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0%" stop-color="#F7F1E0"/>
+      <stop offset="52%" stop-color="#EDE5D2"/>
+      <stop offset="100%" stop-color="#DFD3B8"/>
     </linearGradient>
-    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0.13  0 0 0 0 0.1  0 0 0 0 0.08  0 0 0 0.03 0"/></filter>
+    <radialGradient id="vig" cx="50%" cy="46%" r="72%">
+      <stop offset="60%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#3a2c18" stop-opacity=".13"/>
+    </radialGradient>
   </defs>
-  <rect width="700" height="900" fill="url(#paper)"/>
-  <rect width="700" height="900" filter="url(#grain)"/>
-  <rect x="26" y="26" width="648" height="848" fill="none" stroke="#211B14" stroke-opacity=".14" stroke-width="1.5"/>
-  <path d="M350 620 C350 500 350 420 350 320" fill="none" stroke="#211B14" stroke-opacity=".75" stroke-width="3" stroke-linecap="round"/>
-  <path d="M350 560 C300 520 260 520 230 470" fill="none" stroke="#211B14" stroke-opacity=".7" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M350 500 C400 460 440 460 470 410" fill="none" stroke="#211B14" stroke-opacity=".7" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M350 420 C310 390 290 360 280 320" fill="none" stroke="#C6442B" stroke-opacity=".65" stroke-width="2.5" stroke-linecap="round"/>
-  <text x="350" y="230" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="17" letter-spacing="4" fill="#6a5c44">SKETCH No.</text>
-  <text x="662" y="862" text-anchor="end" font-family="Georgia, serif" font-size="20" fill="#211B14" fill-opacity=".55">04</text>
+
+  <rect width="1760" height="1240" fill="url(#pg)"/>
+
+  <!-- a branch leaning out of the left page into the right -->
+  <path d="M340 1020 C400 840 470 700 566 592 C664 482 800 414 968 386"
+        fill="none" stroke="#211B14" stroke-opacity=".78" stroke-width="13" stroke-linecap="round"/>
+  <path d="M566 592 C548 520 512 470 452 440"
+        fill="none" stroke="#211B14" stroke-opacity=".6" stroke-width="9" stroke-linecap="round"/>
+  <path d="M700 486 C716 414 700 356 656 306"
+        fill="none" stroke="#211B14" stroke-opacity=".6" stroke-width="9" stroke-linecap="round"/>
+  <path d="M840 420 C900 372 976 352 1060 356"
+        fill="none" stroke="#211B14" stroke-opacity=".5" stroke-width="8" stroke-linecap="round"/>
+  <path d="M968 386 C1088 372 1204 404 1300 470"
+        fill="none" stroke="#C6442B" stroke-opacity=".5" stroke-width="8" stroke-linecap="round"/>
+
+  <ellipse cx="1112" cy="330" rx="34" ry="15" transform="rotate(-18 1112 330)"
+           fill="none" stroke="#211B14" stroke-opacity=".42" stroke-width="6"/>
+  <ellipse cx="486" cy="404" rx="34" ry="15" transform="rotate(24 486 404)"
+           fill="none" stroke="#211B14" stroke-opacity=".42" stroke-width="6"/>
+
+  <text x="1320" y="1074" text-anchor="middle" font-family="Georgia,'Times New Roman',serif"
+        font-size="27" letter-spacing="9" fill="#6a5c44" fill-opacity=".82">DAL</text>
+
+  <text x="86" y="1168" font-family="Georgia,serif" font-size="30" fill="#211B14" fill-opacity=".4">8</text>
+  <text x="1674" y="1168" text-anchor="end" font-family="Georgia,serif" font-size="30" fill="#211B14" fill-opacity=".4">9</text>
+
+  <rect width="1760" height="1240" fill="url(#vig)"/>
 </svg>
