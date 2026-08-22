@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sarnıç — yeraltında bir yürüyüş</title>
+<style>
+  :root{
+    --brick:#8a5a36;
+    --water:#0e2a2c;
+    --glow:#ffd9a0;
+    --pale:#e8dcc6;
+    --ink:#0a1416;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#060d0f}
+  body{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    color:var(--pale);
+  }
+  canvas{display:block;touch-action:none}
+
+  #vignette{
+    position:fixed;inset:0;pointer-events:none;z-index:5;
+    background:radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 52%, rgba(3,10,12,.62) 100%);
+  }
+
+  /* ---- chrome ---- */
+  #hud{
+    position:fixed;top:0;left:0;right:0;z-index:10;pointer-events:none;
+    display:flex;align-items:flex-start;justify-content:space-between;
+    gap:1rem;padding:clamp(.9rem,2.4vw,1.5rem) clamp(1rem,3vw,2rem);
+  }
+  #hud a{pointer-events:auto}
+  a.back{
+    font-family:system-ui,sans-serif;font-size:.72rem;letter-spacing:.16em;
+    text-transform:uppercase;color:rgba(232,220,198,.72);text-decoration:none;
+    border:1px solid rgba(232,220,198,.3);padding:.5em .9em;
+    background:rgba(6,14,16,.45);backdrop-filter:blur(6px);
+    transition:color .2s,border-color .2s,background-color .2s;
+  }
+  a.back:hover{color:#fff;border-color:rgba(232,220,198,.75);background:rgba(6,14,16,.75)}
+
+  #title{text-align:right}
+  #title h1{
+    font-size:clamp(1.1rem,3vw,1.7rem);font-weight:400;letter-spacing:.24em;
+    text-indent:.24em;line-height:1;
+  }
+  #title .rule{height:1px;background:rgba(232,220,198,.35);margin:.5rem 0 .45rem}
+  #title p{
+    font-family:system-ui,sans-serif;font-size:.6rem;letter-spacing:.2em;
+    text-transform:uppercase;color:rgba(232,220,198,.5);
+  }
+  #stats{
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.6rem;
+    letter-spacing:.06em;color:rgba(232,220,198,.42);margin-top:.5rem;
+  }
+
+  #hint{
+    position:fixed;left:50%;bottom:clamp(.9rem,3vh,1.6rem);transform:translateX(-50%);
+    z-index:10;pointer-events:none;max-width:94vw;
+  }
+  .pill{
+    display:inline-block;font-family:system-ui,sans-serif;
+    font-size:clamp(.56rem,1.7vw,.68rem);letter-spacing:.1em;text-transform:uppercase;
+    color:rgba(232,220,198,.72);background:rgba(6,14,16,.5);
+    border:1px solid rgba(232,220,198,.18);border-radius:999px;
+    padding:.55em 1.1em;backdrop-filter:blur(6px);text-align:center;line-height:1.9;
+  }
+  .pill b{color:var(--glow);font-weight:600}
+
+  /* ---- loading + error ---- */
+  #loading{
+    position:fixed;inset:0;z-index:300;display:flex;
+    flex-direction:column;align-items:center;justify-content:center;gap:1rem;
+    background:#060d0f;transition:opacity .7s ease;text-align:center;padding:2rem;
+  }
+  #loading.gone{opacity:0;pointer-events:none}
+  #loading .arch{
+    width:54px;height:70px;border:2px solid rgba(232,220,198,.45);
+    border-radius:27px 27px 3px 3px;border-bottom:none;
+    animation:breathe 2.4s ease-in-out infinite;
+  }
+  @keyframes breathe{0%,100%{opacity:.35}50%{opacity:.9}}
+  #loading h2{font-size:1.4rem;font-weight:400;letter-spacing:.3em;text-indent:.3em}
+  #loading p{
+    font-family:system-ui,sans-serif;font-size:.64rem;letter-spacing:.16em;
+    text-transform:uppercase;color:rgba(232,220,198,.45);
+  }
+  /* ---- dokunmatik: klavye olmayan cihazda basılı tut-yürü ---- */
+  #walkbtn{
+    position:fixed;right:clamp(1rem,5vw,2rem);bottom:clamp(4.4rem,13vh,6rem);
+    z-index:20;display:none;width:82px;height:82px;border-radius:50%;
+    align-items:center;justify-content:center;
+    border:1px solid rgba(232,220,198,.32);background:rgba(6,14,16,.5);
+    backdrop-filter:blur(6px);color:rgba(232,220,198,.8);
+    font-family:system-ui,sans-serif;font-size:.62rem;letter-spacing:.14em;
+    text-transform:uppercase;-webkit-tap-highlight-color:transparent;
+    touch-action:none;user-select:none;cursor:pointer;
+  }
+  #walkbtn.on{background:rgba(255,201,138,.22);color:#fff;border-color:rgba(255,201,138,.6)}
+  .touch-only{display:none}
+  @media (pointer:coarse){
+    #walkbtn{display:flex}
+    .touch-only{display:inline}
+    .fine-only{display:none}
+  }
+
+  #err{
+    position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:400;
+    display:none;max-width:640px;background:#fff7f0;color:#5a1f12;
+    border:2px solid #b2462b;padding:22px 26px;
+    font-family:ui-monospace,Menlo,monospace;font-size:13px;line-height:1.6;
+    white-space:pre-wrap;
+  }
+</style>
+</head>
+<body>
+
+<div id="vignette"></div>
+
+<div id="hud">
+  <a class="back" href="/">← geri</a>
+  <div>
+    <div id="title">
+      <h1>SARNIÇ</h1>
+      <div class="rule"></div>
+      <p>Yeraltı · sütun ormanı · sığ su</p>
+    </div>
+    <div id="stats"><span id="modeLabel">yürüyüş</span> · <span id="fps">&nbsp;</span></div>
+  </div>
+</div>
+
+<div id="hint">
+  <span class="pill">
+    <span class="fine-only"><b>W A S D</b> yürü &middot; <b>sürükle</b> bak &middot;
+      <b>çift tık</b> fare kilidi &middot; <b>shift</b> koş &middot; <b>V</b> kuşbakışı</span>
+    <span class="touch-only"><b>sürükle</b> bak &middot; <b>yürü</b> düğmesini basılı tut</span>
+  </span>
+</div>
+
+<div id="walkbtn" role="button" aria-label="Yürü">yürü</div>
+
+<div id="loading">
+  <div class="arch"></div>
+  <h2>SARNIÇ</h2>
+  <p>sütunlar dikiliyor · tonoz örülüyor · su basıyor</p>
+</div>
+
+<div id="err"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+/* ======================================================================
+   SARNIÇ — tek dosya, tamamen prosedürel bir yeraltı sarnıcı.
+
+   Mekanik pulkitxm/claude-directory içindeki sidi-bou-said-3d-walk'tan
+   uyarlandı (MIT): tek dosya, CDN'den Three.js, dış varlık yok, her
+   doku bir <canvas>'a çiziliyor; göz hizasında yürüyen bir kamera,
+   sürükleyerek bakma, çift tıkla fare kilidi, V ile kuşbakışı.
+
+   Oradaki sahne bir Tunus köyüydü ve yürünebilir alan bir spline
+   koridordu. Buradaki sahne bir sarnıç, yürünebilir alan da dikdörtgen
+   bir salondan sütun silindirlerinin çıkarılmasıyla tanımlanıyor —
+   aynı clampToWalkable(x,z) sözleşmesi, farklı geometri.
+   ====================================================================== */
+
+/* ---- hata yüzeyi: boş ekran hiçbir zaman açıklamasız kalmasın ---- */
+const errBox = document.getElementById("err");
+let fatalShown = false;
+function fatal(msg){
+  if(fatalShown) return;
+  fatalShown = true;
+  errBox.style.display = "block";
+  errBox.textContent = `Sarnıç kurulamadı:\n\n${msg}`;
+  document.getElementById("loading").classList.add("gone");
+}
+addEventListener("error", e => { if(e.message) fatal(e.message + (e.filename ? `\n${e.filename}:${e.lineno}` : "")); });
+addEventListener("unhandledrejection", e => fatal(String(e.reason?.stack ?? e.reason)));
+
+/* ======================================================================
+   1. BELİRLENİMCİ RASTGELELİK  (mulberry32 + değer gürültüsü + fbm)
+   Aynı tohum her zaman aynı sarnıcı kurar.
+   ====================================================================== */
+function mulberry32(seed){
+  let a = seed >>> 0;
+  return () => {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hash2i(x, y, seed){
+  let h = (Math.imul(x|0, 374761393) + Math.imul(y|0, 668265263) + Math.imul(seed|0, 2246822519)) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+/* period > 0 ise kafes sarmalanır — kiremitlenen dokular için şart */
+function valueNoise2(x, y, seed, period){
+  const xi = Math.floor(x), yi = Math.floor(y);
+  const fx = x - xi, fy = y - yi;
+  let x0 = xi, y0 = yi, x1 = xi + 1, y1 = yi + 1;
+  if(period > 0){
+    x0 = ((x0 % period) + period) % period; y0 = ((y0 % period) + period) % period;
+    x1 = ((x1 % period) + period) % period; y1 = ((y1 % period) + period) % period;
+  }
+  const sx = fx*fx*fx*(fx*(fx*6-15)+10), sy = fy*fy*fy*(fy*(fy*6-15)+10);
+  const a = hash2i(x0,y0,seed), b = hash2i(x1,y0,seed);
+  const c = hash2i(x0,y1,seed), d = hash2i(x1,y1,seed);
+  return a + (b-a)*sx + (c-a)*sy + (a-b-c+d)*sx*sy;
+}
+function fbm2(x, y, oct, seed, period){
+  let sum = 0, amp = 0.5, f = 1;
+  for(let i = 0; i < oct; i++){
+    sum += amp * valueNoise2(x*f, y*f, seed + i*101, period > 0 ? period*f : 0);
+    amp *= 0.5; f *= 2;
+  }
+  return sum;
+}
+const rnd = mulberry32(20260821);
+
+/* ======================================================================
+   2. DOKULAR — hepsi <canvas>'a çiziliyor, tek bir dış dosya yok
+   ====================================================================== */
+function canvas2d(size){
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  return [c, c.getContext("2d")];
+}
+function toTexture(c, repeat){
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(repeat, repeat);
+  t.anisotropy = 8;
+  return t;
+}
+
+/* nemli tuğla: harç derzleri, ton oynamaları, aşağı doğru ıslaklık */
+function brickMaps(S = 512){
+  const [cc, cx] = canvas2d(S);      // renk
+  const [bc, bx] = canvas2d(S);      // yükseklik (bump)
+  const rows = 16, bh = S / rows;
+  cx.fillStyle = "#3d2a1d"; cx.fillRect(0, 0, S, S);   // harç
+  bx.fillStyle = "#4a4a4a"; bx.fillRect(0, 0, S, S);
+  for(let r = 0; r < rows; r++){
+    const off = (r % 2) * 0.5;
+    const bw = S / 8;
+    for(let i = -1; i < 9; i++){
+      const x = (i + off) * bw, y = r * bh;
+      const n = fbm2(i * 1.7, r * 2.3, 3, 7, 0);
+      const hue = 22 + n * 14;
+      const sat = 30 + n * 16;
+      const lig = 26 + n * 16;
+      cx.fillStyle = `hsl(${hue} ${sat}% ${lig}%)`;
+      cx.fillRect(x + 1.5, y + 1.5, bw - 3, bh - 3);
+      bx.fillStyle = `rgb(${180 + n * 50 | 0},${180 + n * 50 | 0},${180 + n * 50 | 0})`;
+      bx.fillRect(x + 1.5, y + 1.5, bw - 3, bh - 3);
+    }
+  }
+  /* lekeler ve kireç akıntıları */
+  const img = cx.getImageData(0, 0, S, S), d = img.data;
+  for(let y = 0; y < S; y++){
+    for(let x = 0; x < S; x++){
+      const i = (y * S + x) * 4;
+      const n = fbm2(x / 34, y / 34, 4, 21, S / 34);
+      const wet = Math.pow(y / S, 1.6) * 0.5;          // dibe doğru koyulaşma
+      const k = 0.72 + n * 0.5 - wet;
+      d[i] *= k; d[i+1] *= k * 0.98; d[i+2] *= k * 0.94;
+    }
+  }
+  cx.putImageData(img, 0, 0);
+  return { map: toTexture(cc, 1), bump: toTexture(bc, 1) };
+}
+
+/* su için kiremitlenen normal haritası */
+function waterNormal(S = 256){
+  const [c, x] = canvas2d(S);
+  const img = x.createImageData(S, S), d = img.data;
+  const H = (i, j) => fbm2(i / 26, j / 26, 4, 55, S / 26) + 0.5 * fbm2(i / 9, j / 9, 3, 91, S / 9);
+  for(let y = 0; y < S; y++){
+    for(let j = 0; j < S; j++){
+      const dx = H(j + 1, y) - H(j - 1, y);
+      const dy = H(j, y + 1) - H(j, y - 1);
+      const nx = -dx * 2.2, ny = -dy * 2.2, nz = 1;
+      const L = Math.hypot(nx, ny, nz);
+      const i = (y * S + j) * 4;
+      d[i]   = ((nx / L) * 0.5 + 0.5) * 255;
+      d[i+1] = ((ny / L) * 0.5 + 0.5) * 255;
+      d[i+2] = ((nz / L) * 0.5 + 0.5) * 255;
+      d[i+3] = 255;
+    }
+  }
+  x.putImageData(img, 0, 0);
+  return toTexture(c, 5);
+}
+
+/* ıslak taş zemin */
+function floorMap(S = 512){
+  const [c, x] = canvas2d(S);
+  const img = x.createImageData(S, S), d = img.data;
+  for(let y = 0; y < S; y++){
+    for(let j = 0; j < S; j++){
+      const n = fbm2(j / 40, y / 40, 5, 33, S / 40);
+      const slab = (Math.floor(j / 64) + Math.floor(y / 64)) % 2 ? 0.94 : 1;
+      const g = (26 + n * 34) * slab;
+      const i = (y * S + j) * 4;
+      d[i] = g * 1.06; d[i+1] = g; d[i+2] = g * 0.9; d[i+3] = 255;
+    }
+  }
+  x.putImageData(img, 0, 0);
+  return toTexture(c, 6);
+}
+
+/* ======================================================================
+   3. SAHNE
+   ====================================================================== */
+const HALL_W = 66, HALL_D = 46;        // salon
+const SPACING = 6.6;                   // sütun aralığı
+const COL_R = 0.82, COL_H = 8.6;
+const CEIL_Y = 10.4, WATER_Y = 0.2, EYE = 1.62;
+const CLEAR = COL_R + 0.62;            // sütuna en fazla bu kadar sokulunur
+const BOUND_X = HALL_W / 2 - 2.2, BOUND_Z = HALL_D / 2 - 2.2;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x060d0f);
+scene.fog = new THREE.FogExp2(0x08171a, 0.021);
+
+const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.05, 400);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.12;
+document.body.appendChild(renderer.domElement);
+
+const brick = brickMaps();
+const wnorm = waterNormal();
+const fmap = floorMap();
+
+/* ---- sütun ızgarası ---- */
+const cols = [];
+for(let x = -HALL_W/2 + 5; x <= HALL_W/2 - 5; x += SPACING)
+  for(let z = -HALL_D/2 + 5; z <= HALL_D/2 - 5; z += SPACING)
+    cols.push(new THREE.Vector2(x, z));
+
+/* ---- zemin ve su ---- */
+const floorMat = new THREE.MeshStandardMaterial({ map: fmap, roughness: .93, metalness: .02, color: 0x6b6257 });
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(HALL_W + 8, HALL_D + 8), floorMat);
+floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
+scene.add(floor);
+
+const waterMat = new THREE.MeshStandardMaterial({
+  color: 0x0b2326, roughness: .07, metalness: .55,
+  normalMap: wnorm, normalScale: new THREE.Vector2(.32, .32),
+  transparent: true, opacity: .9,
+});
+const water = new THREE.Mesh(new THREE.PlaneGeometry(HALL_W + 8, HALL_D + 8), waterMat);
+water.rotation.x = -Math.PI / 2;
+water.position.y = WATER_Y;
+scene.add(water);
+
+/* ---- sütunlar: gövde + kaide + başlık, örneklenmiş ---- */
+const brickMat = new THREE.MeshStandardMaterial({
+  map: brick.map, bumpMap: brick.bump, bumpScale: .045,
+  roughness: .88, metalness: .03, color: 0xb59274,
+});
+const shafts = new THREE.InstancedMesh(new THREE.CylinderGeometry(COL_R, COL_R * 1.06, COL_H, 18, 1), brickMat, cols.length);
+const bases  = new THREE.InstancedMesh(new THREE.CylinderGeometry(COL_R * 1.34, COL_R * 1.5, .7, 18), brickMat, cols.length);
+const caps   = new THREE.InstancedMesh(new THREE.BoxGeometry(COL_R * 3, .82, COL_R * 3), brickMat, cols.length);
+[shafts, bases, caps].forEach(m => { m.castShadow = true; m.receiveShadow = true; scene.add(m); });
+
+const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), Sc = new THREE.Vector3(1,1,1), P = new THREE.Vector3();
+cols.forEach((c, i) => {
+  const lean = (rnd() - .5) * 0.012;                 // hiçbiri tam dik değil
+  Q.setFromEuler(new THREE.Euler(lean, rnd() * 6.28, lean));
+  P.set(c.x, COL_H / 2 + .5, c.y);
+  shafts.setMatrixAt(i, M.compose(P, Q, Sc));
+  P.set(c.x, .35, c.y);
+  bases.setMatrixAt(i, M.compose(P, Q, Sc));
+  P.set(c.x, COL_H + .9, c.y);
+  caps.setMatrixAt(i, M.compose(P, Q, Sc));
+});
+[shafts, bases, caps].forEach(m => m.instanceMatrix.needsUpdate = true);
+
+/* ---- kemerler: sütun başlıklarını iki eksende birbirine bağlar ---- */
+function arcadeAxis(alongX){
+  const spans = [];
+  const seen = new Set();
+  cols.forEach(a => {
+    const b = cols.find(o =>
+      alongX ? (Math.abs(o.y - a.y) < .01 && Math.abs(o.x - a.x - SPACING) < .01)
+             : (Math.abs(o.x - a.x) < .01 && Math.abs(o.y - a.y - SPACING) < .01));
+    if(!b) return;
+    const key = `${a.x},${a.y},${alongX}`;
+    if(seen.has(key)) return;
+    seen.add(key);
+    spans.push([a, b]);
+  });
+  if(!spans.length) return;
+  const R = SPACING / 2;
+  const geo = new THREE.TorusGeometry(R, .42, 8, 22, Math.PI);
+  const mesh = new THREE.InstancedMesh(geo, brickMat, spans.length);
+  mesh.castShadow = mesh.receiveShadow = true;
+  spans.forEach(([a, b], i) => {
+    const mx = (a.x + b.x) / 2, mz = (a.y + b.y) / 2;
+    Q.setFromEuler(new THREE.Euler(0, alongX ? 0 : Math.PI / 2, 0));
+    P.set(mx, COL_H + 1.3, mz);
+    mesh.setMatrixAt(i, M.compose(P, Q, Sc));
+  });
+  mesh.instanceMatrix.needsUpdate = true;
+  scene.add(mesh);
+}
+arcadeAxis(true);
+arcadeAxis(false);
+
+/* ---- tavan ---- */
+const ceil = new THREE.Mesh(
+  new THREE.PlaneGeometry(HALL_W + 8, HALL_D + 8),
+  new THREE.MeshStandardMaterial({ map: brick.map, bumpMap: brick.bump, bumpScale: .03, roughness: .95, color: 0x6d5540 })
+);
+ceil.rotation.x = Math.PI / 2;
+ceil.position.y = CEIL_Y;
+ceil.receiveShadow = true;
+scene.add(ceil);
+
+/* ---- duvarlar ---- */
+const wallMat = new THREE.MeshStandardMaterial({ map: brick.map, bumpMap: brick.bump, bumpScale: .05, roughness: .92, color: 0x8f7154, side: THREE.BackSide });
+const walls = new THREE.Mesh(new THREE.BoxGeometry(HALL_W + 8, CEIL_Y + 6, HALL_D + 8), wallMat);
+walls.position.y = (CEIL_Y + 6) / 2 - 3;
+walls.receiveShadow = true;
+scene.add(walls);
+
+/* ---- tepedeki gözler: ışık huzmeleri ---- */
+const OCULI = [
+  new THREE.Vector2(-SPACING * 2.5, -SPACING * 1.5),
+  new THREE.Vector2( SPACING * 1.5,  SPACING * 0.5),
+  new THREE.Vector2( SPACING * 4.5, -SPACING * 2.5),
+];
+const shaftMat = new THREE.MeshBasicMaterial({
+  color: 0xffd8a2, transparent: true, opacity: .17,
+  blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+});
+OCULI.forEach((o, i) => {
+  /* gözün kendisi */
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(1.5, 28), new THREE.MeshBasicMaterial({ color: 0xfff0d2 }));
+  disc.rotation.x = Math.PI / 2;
+  disc.position.set(o.x, CEIL_Y - .02, o.y);
+  scene.add(disc);
+
+  /* huzme: aşağı doğru açılan koni */
+  const H = CEIL_Y - WATER_Y;
+  const cone = new THREE.Mesh(new THREE.ConeGeometry(3.4, H, 26, 1, true), shaftMat);
+  cone.position.set(o.x, WATER_Y + H / 2, o.y);
+  cone.rotation.x = Math.PI;          // geniş ucu aşağıda
+  scene.add(cone);
+
+  /* suda sahte yansıma: aynı koni, aşağı doğru, daha soluk */
+  const refl = cone.clone();
+  refl.material = shaftMat.clone();
+  refl.material.opacity = .07;
+  refl.position.y = WATER_Y - H / 2;
+  refl.rotation.x = 0;
+  scene.add(refl);
+
+  /* huzmenin suda açtığı aydınlık havuz */
+  const pool = new THREE.Mesh(
+    new THREE.CircleGeometry(3.6, 30),
+    new THREE.MeshBasicMaterial({ color: 0xffce8a, transparent: true, opacity: .3, blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  pool.rotation.x = -Math.PI / 2;
+  pool.position.set(o.x, WATER_Y + .012, o.y);
+  scene.add(pool);
+
+  /* ilk iki göz gölge düşürür — üçü birden pahalıya geliyor */
+  const spot = new THREE.SpotLight(0xffd9a8, 1400, 40, 0.5, .6, 1.35);
+  spot.position.set(o.x, CEIL_Y - .3, o.y);
+  spot.target.position.set(o.x, 0, o.y);
+  if(i < 2){
+    spot.castShadow = true;
+    spot.shadow.mapSize.set(1024, 1024);
+    spot.shadow.camera.near = 1;
+    spot.shadow.camera.far = 26;
+    spot.shadow.bias = -0.0022;
+  }
+  scene.add(spot, spot.target);
+});
+
+/* ---- dolgu ışıkları ---- */
+scene.add(new THREE.HemisphereLight(0x3d6a74, 0x101d20, 1.5));
+scene.add(new THREE.AmbientLight(0x24525c, 1.35));
+const lamps = [];
+[[-HALL_W/2 + 6, -HALL_D/2 + 7], [HALL_W/2 - 7, HALL_D/2 - 6], [2, -HALL_D/2 + 6]].forEach(([x, z]) => {
+  const l = new THREE.PointLight(0xffb46a, 90, 26, 1.7);
+  l.position.set(x, 2.6, z);
+  scene.add(l);
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(.13, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffd9a0 }));
+  bulb.position.copy(l.position);
+  scene.add(bulb);
+  lamps.push(l);
+});
+
+/* yürüyenin taşıdığı fener: yakın çevre okunur kalsın, yoksa göz
+   hizasında her şey siyaha gömülüyor */
+const lantern = new THREE.PointLight(0xffc98a, 34, 15, 1.9);
+scene.add(lantern);
+
+/* ======================================================================
+   4. YÜRÜYÜŞ — referanstaki clampToWalkable(x,z) sözleşmesi korunuyor:
+   düzeltilmiş konumu ve o noktadaki zemin yüksekliğini döndürür.
+   ====================================================================== */
+function clampToWalkable(px, pz){
+  let x = Math.max(-BOUND_X, Math.min(BOUND_X, px));
+  let z = Math.max(-BOUND_Z, Math.min(BOUND_Z, pz));
+  /* sütunlardan dışarı it — en yakın olan kazanır, iki tur yeterli */
+  for(let pass = 0; pass < 2; pass++){
+    for(const c of cols){
+      const dx = x - c.x, dz = z - c.y;
+      const d = Math.hypot(dx, dz);
+      if(d < CLEAR){
+        if(d < 1e-5){ x = c.x + CLEAR; continue; }
+        x = c.x + (dx / d) * CLEAR;
+        z = c.y + (dz / d) * CLEAR;
+      }
+    }
+  }
+  return { x, z, y: 0 };
+}
+
+/* yaw 0 ⇒ ileri yön -Z: salonun içine doğru, duvara değil */
+const walker = { x: 0, z: HALL_D / 2 - 6, yaw: 0, pitch: -0.03, eyeY: EYE, groundY: 0 };
+const keys = new Set();
+let mode = "walk";
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+function walkQuat(){
+  return new THREE.Quaternion().setFromEuler(new THREE.Euler(walker.pitch, walker.yaw, 0, "YXZ"));
+}
+
+/* ---- bakış: her yerde sürükle, ya da çift tıkla fare kilidi ---- */
+const dom = renderer.domElement;
+let dragId = null, lastPX = 0, lastPY = 0;
+dom.addEventListener("contextmenu", e => e.preventDefault());
+dom.addEventListener("pointerdown", e => {
+  if(mode !== "walk" || document.pointerLockElement === dom) return;
+  dragId = e.pointerId; lastPX = e.clientX; lastPY = e.clientY;
+  try{ dom.setPointerCapture(e.pointerId); }catch(err){}
+});
+dom.addEventListener("pointermove", e => {
+  if(mode !== "walk") return;
+  if(document.pointerLockElement === dom){
+    walker.yaw -= e.movementX * 0.0026;
+    walker.pitch = clamp(walker.pitch - e.movementY * 0.0026, -1.15, 0.72);
+    return;
+  }
+  if(e.pointerId !== dragId) return;
+  walker.yaw -= (e.clientX - lastPX) * 0.0036;
+  walker.pitch = clamp(walker.pitch - (e.clientY - lastPY) * 0.0036, -1.15, 0.72);
+  lastPX = e.clientX; lastPY = e.clientY;
+});
+dom.addEventListener("pointerup", e => { if(e.pointerId === dragId) dragId = null; });
+dom.addEventListener("pointercancel", () => { dragId = null; });
+dom.addEventListener("dblclick", () => {
+  if(mode !== "walk") return;
+  if(document.pointerLockElement === dom) document.exitPointerLock();
+  else dom.requestPointerLock();
+});
+
+const HANDLED = ["KeyW","KeyA","KeyS","KeyD","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"];
+addEventListener("keydown", e => {
+  if(HANDLED.includes(e.code)) e.preventDefault();
+  keys.add(e.code);
+  if(e.code === "KeyV" && !e.repeat) toggleView();
+});
+addEventListener("keyup", e => keys.delete(e.code));
+addEventListener("blur", () => keys.clear());
+
+/* dokunmatikte klavye yok: basılı tutulan düğme ileri girdisi sayılır */
+let touchWalk = 0;
+const walkBtn = document.getElementById("walkbtn");
+const holdOn  = e => { e.preventDefault(); touchWalk = 1; walkBtn.classList.add("on"); };
+const holdOff = () => { touchWalk = 0; walkBtn.classList.remove("on"); };
+walkBtn.addEventListener("pointerdown", holdOn);
+["pointerup","pointercancel","pointerleave"].forEach(t => walkBtn.addEventListener(t, holdOff));
+addEventListener("blur", holdOff);
+
+function updateWalker(dt){
+  let f = 0, r = 0;
+  if(keys.has("KeyW") || keys.has("ArrowUp") || touchWalk) f += 1;
+  if(keys.has("KeyS") || keys.has("ArrowDown")) f -= 1;
+  if(keys.has("KeyD") || keys.has("ArrowRight")) r += 1;
+  if(keys.has("KeyA") || keys.has("ArrowLeft")) r -= 1;
+  const run = keys.has("ShiftLeft") || keys.has("ShiftRight");
+  const speed = (run ? 5.4 : 2.6) * dt;
+  if(f !== 0 || r !== 0){
+    const norm = speed / Math.hypot(f, r);
+    const sin = Math.sin(walker.yaw), cos = Math.cos(walker.yaw);
+    const nx = walker.x + (-sin * f + cos * r) * norm;
+    const nz = walker.z + (-cos * f - sin * r) * norm;
+    const c = clampToWalkable(nx, nz);
+    walker.x = c.x; walker.z = c.z; walker.groundY = c.y;
+  }
+  /* suda yürüyüşün hafif salınımı */
+  const bob = (f || r) ? Math.sin(performance.now() * (run ? .011 : .0068)) * (run ? .045 : .026) : 0;
+  const targetEye = walker.groundY + EYE + bob;
+  walker.eyeY += (targetEye - walker.eyeY) * Math.min(1, dt * 9);
+  camera.position.set(walker.x, walker.eyeY, walker.z);
+  camera.quaternion.copy(walkQuat());
+  lantern.position.set(walker.x, walker.eyeY - .35, walker.z);
+}
+
+/* ======================================================================
+   5. KUŞBAKIŞI — V ile geçiş, arada yumuşak bir tween
+   ====================================================================== */
+const orbit = new OrbitControls(camera, dom);
+orbit.enabled = false;
+orbit.enableDamping = true;
+orbit.dampingFactor = .08;
+orbit.minDistance = 14;
+orbit.maxDistance = 150;
+orbit.maxPolarAngle = 1.45;
+orbit.target.set(0, 3, 0);
+const OVERVIEW_POS = new THREE.Vector3(34, 40, 44);
+const modeLabel = document.getElementById("modeLabel");
+
+const tween = { active: false, t: 0, dur: 1, p0: new THREE.Vector3(), p1: new THREE.Vector3(), q0: new THREE.Quaternion(), q1: new THREE.Quaternion(), done: null };
+function startTween(pos, quat, dur, done){
+  tween.active = true; tween.t = 0; tween.dur = dur;
+  tween.p0.copy(camera.position); tween.p1.copy(pos);
+  tween.q0.copy(camera.quaternion); tween.q1.copy(quat);
+  tween.done = done;
+  orbit.enabled = false;
+  mode = "tween";
+}
+function toggleView(){
+  if(tween.active) return;
+  if(mode === "walk"){
+    const q = new THREE.Quaternion();
+    const m = new THREE.Matrix4().lookAt(OVERVIEW_POS, orbit.target, new THREE.Vector3(0,1,0));
+    q.setFromRotationMatrix(m);
+    startTween(OVERVIEW_POS, q, 1.5, () => {
+      mode = "orbit"; orbit.enabled = true;
+      modeLabel.textContent = "kuşbakışı";
+    });
+  } else if(mode === "orbit"){
+    const eye = new THREE.Vector3(walker.x, walker.eyeY, walker.z);
+    startTween(eye, walkQuat(), 1.5, () => {
+      mode = "walk";
+      modeLabel.textContent = "yürüyüş";
+    });
+  }
+}
+
+/* ======================================================================
+   6. DÖNGÜ
+   ====================================================================== */
+addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+const fpsEl = document.getElementById("fps");
+let last = performance.now(), acc = 0, frames = 0;
+
+function frame(now){
+  requestAnimationFrame(frame);
+  const dt = Math.min(.05, (now - last) / 1000);
+  last = now;
+
+  /* su yüzeyi sürüklensin */
+  wnorm.offset.x += dt * .009;
+  wnorm.offset.y += dt * .0055;
+
+  /* lambalar hafif titresin */
+  lamps.forEach((l, i) => { l.intensity = 90 + Math.sin(now * .004 + i * 2.1) * 11; });
+
+  if(tween.active){
+    tween.t += dt / tween.dur;
+    const k = Math.min(1, tween.t);
+    const e = k < .5 ? 4*k*k*k : 1 - Math.pow(-2*k + 2, 3) / 2;   // easeInOutCubic
+    camera.position.lerpVectors(tween.p0, tween.p1, e);
+    camera.quaternion.slerpQuaternions(tween.q0, tween.q1, e);
+    if(k >= 1){ tween.active = false; const d = tween.done; tween.done = null; d && d(); }
+  } else if(mode === "walk"){
+    updateWalker(dt);
+  } else if(mode === "orbit"){
+    orbit.update();
+  }
+
+  renderer.render(scene, camera);
+
+  frames++; acc += dt;
+  if(acc >= .5){ fpsEl.textContent = `${Math.round(frames / acc)} fps`; frames = 0; acc = 0; }
+}
+
+/* ilk kareyi çizdikten sonra yükleme perdesini kaldır */
+camera.position.set(walker.x, EYE, walker.z);
+camera.quaternion.copy(walkQuat());
+renderer.render(scene, camera);
+requestAnimationFrame(frame);
+setTimeout(() => document.getElementById("loading").classList.add("gone"), 220);
+</script>
+</body>
+</html>
