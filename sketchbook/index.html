@@ -9,6 +9,15 @@
     --paper:#E9E1CE;
     --paper-lit:#F6F0DE;
     --paper-dim:#DCD0B4;
+    /* The ground the book rests on. It has to sit clearly BELOW the page
+       artwork in value (the spreads run #F7F1E0 → #DFD3B8), or the book
+       has no silhouette and every shadow below is spent fighting the
+       backdrop instead of describing form. MengTo's page gets this free:
+       his ground is a flat painted wash and his pages are photographs of
+       real white paper. Ours are flat SVG, so the gap is made here. */
+    --ground:#DCD0B6;
+    --ground-mid:#CFC0A0;
+    --ground-dim:#B8A681;
     --ink:#211B14;
     --ink-soft:rgba(33,27,20,.58);
     --ink-faint:rgba(33,27,20,.34);
@@ -20,7 +29,8 @@
   html{-webkit-text-size-adjust:100%}
   body{
     min-height:100%;
-    background:radial-gradient(120% 90% at 50% 38%, var(--paper-lit), var(--paper) 55%, var(--paper-dim) 100%);
+    /* darkens outward, so the brightest thing on screen is the paper */
+    background:radial-gradient(130% 105% at 50% 34%, var(--ground) 0%, var(--ground-mid) 46%, var(--ground-dim) 100%);
     background-attachment:fixed;
     color:var(--ink);
     position:relative;
@@ -64,14 +74,18 @@
     color:var(--ink-faint);font-variant-numeric:tabular-nums;
   }
 
+  /* The title block is a caption for the book, not a banner competing
+     with it: tight to itself, then a wide gap so the spread reads as a
+     separate object sitting on the surface. */
   h1{
-    font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:400;font-style:italic;
-    letter-spacing:.02em;margin-bottom:.5rem;text-align:center;
+    font-size:clamp(1.7rem,3.9vw,2.5rem);font-weight:400;font-style:italic;
+    letter-spacing:.01em;margin-bottom:.62rem;text-align:center;line-height:1.1;
   }
   .kicker{
     font-family:system-ui,sans-serif;
-    font-size:.68rem;letter-spacing:.26em;text-transform:uppercase;
-    color:var(--ink-faint);margin-bottom:clamp(1.6rem,4vh,2.6rem);text-align:center;
+    font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--ink-faint);margin-bottom:clamp(2.6rem,6.5vh,4.4rem);text-align:center;
+    padding-left:.3em;
   }
 
   /* ================================================================
@@ -114,37 +128,48 @@
   /* the book rests on a surface: a pool of shadow, no hard edges.
      all three ease off while a leaf is in the air. */
   .sb-cast{position:absolute;pointer-events:none;z-index:0}
+  /* MengTo's pages are photographs that carry their own surroundings, so
+     his blobs sit inside the frame (his --pg is 21.8%). Our spreads are
+     SVG bled to all four edges (--pg 1.5%), which means anything drawn
+     inside the frame is hidden behind the paper — the shadow has to live
+     outside it. So: a layered drop shadow cast by the sheet itself,
+     then a pool on the surface underneath. */
   .sb-cast.ambient{
-    left:-2%;right:-2%;top:16%;bottom:-10%;
-    background:radial-gradient(50% 50% at 50% 60%,
-      rgba(74,56,30,.44) 0%,rgba(74,56,30,.24) 42%,rgba(74,56,30,0) 76%);
-    filter:blur(30px);
-    opacity:calc(1 - var(--shade,0) * .42);
+    inset:0;border-radius:2px;
+    box-shadow:
+      0 1px 1px rgba(46,32,12,.34),
+      0 5px 9px rgba(46,32,12,.24),
+      0 15px 26px rgba(52,38,18,.22),
+      0 34px 56px rgba(58,44,22,.20);
+    opacity:calc(1 - var(--shade,0) * .34);
   }
+  /* Both pools start at the bottom edge and fall away downward, so all of
+     their darkness lands on the surface instead of behind the paper. */
   .sb-cast.contact{
-    left:4%;right:4%;top:56%;bottom:-3%;
-    background:radial-gradient(50% 46% at 50% 46%,
-      rgba(58,42,18,.46) 0%,rgba(58,42,18,.2) 50%,rgba(58,42,18,0) 80%);
-    filter:blur(13px);
+    left:2%;right:2%;top:100%;bottom:-15%;
+    background:radial-gradient(62% 100% at 50% 0%,
+      rgba(46,32,12,.52) 0%,rgba(46,32,12,.24) 40%,rgba(46,32,12,0) 76%);
+    filter:blur(15px);
     opacity:calc(1 - var(--shade,0) * .5);
   }
   .sb-cast.hair{
-    left:9%;right:9%;top:70%;bottom:2%;
-    background:radial-gradient(50% 54% at 50% 44%,
-      rgba(52,36,12,.42) 0%,rgba(52,36,12,0) 76%);
-    filter:blur(5px);
+    left:9%;right:9%;top:100%;bottom:-4.5%;
+    background:radial-gradient(58% 100% at 50% 0%,
+      rgba(38,25,6,.5) 0%,rgba(38,25,6,0) 78%);
+    filter:blur(4px);
     opacity:calc(1 - var(--shade,0) * .62);
   }
 
   /* the fore-edge of the page block, so the book has thickness */
   .sb-edge{
-    position:absolute;top:1.2%;bottom:1.2%;width:6px;z-index:0;pointer-events:none;
+    position:absolute;top:1.2%;bottom:1.2%;width:7px;z-index:0;pointer-events:none;
+    /* stacked leaves seen end-on: a bright sheet, a dark seam, repeat */
     background:repeating-linear-gradient(180deg,
-      rgba(126,104,68,.22) 0 .5px, rgba(243,236,217,.92) .5px 3px);
+      rgba(108,86,52,.42) 0 .5px, rgba(246,240,223,.96) .5px 3px);
     opacity:calc(1 - var(--shade,0) * .3);
   }
-  .sb-edge.l{left:-5px;border-radius:3px 0 0 3px;box-shadow:-3px 4px 9px rgba(58,42,18,.3)}
-  .sb-edge.r{right:-5px;border-radius:0 3px 3px 0;box-shadow:3px 4px 9px rgba(58,42,18,.3)}
+  .sb-edge.l{left:-6px;border-radius:3px 0 0 3px;box-shadow:-4px 5px 11px rgba(48,33,12,.42)}
+  .sb-edge.r{right:-6px;border-radius:0 3px 3px 0;box-shadow:4px 5px 11px rgba(48,33,12,.42)}
 
   /* the resting spread, and the two halves shown mid-turn */
   .sb-full{position:absolute;inset:0}
@@ -157,24 +182,52 @@
 
   /* the gutter: a permanent crease, plus the shadow the lifting leaf
      throws onto the page beneath it */
+  /* The crease. Both pages fall away toward the centre, so the darkening
+     is wide and gradual, with a tight dark seam right on the fold — a
+     single soft band reads as haze, not as two sheets meeting. */
   .sb-gutter{
-    position:absolute;left:50%;top:0;bottom:0;width:10%;
+    position:absolute;left:50%;top:0;bottom:0;width:17%;
     transform:translateX(-50%);pointer-events:none;z-index:4;
     background:linear-gradient(90deg,
-      rgba(52,38,20,0) 0%,rgba(52,38,20,.06) 24%,rgba(52,38,20,.13) 42%,
-      rgba(56,41,21,.18) 50%,rgba(52,38,20,.13) 58%,rgba(52,38,20,.06) 76%,
+      rgba(52,38,20,0) 0%,rgba(52,38,20,.05) 18%,rgba(52,38,20,.13) 34%,
+      rgba(52,38,20,.24) 44%,rgba(46,32,14,.42) 49.4%,
+      rgba(38,26,10,.5) 50%,rgba(46,32,14,.42) 50.6%,
+      rgba(52,38,20,.24) 56%,rgba(52,38,20,.13) 66%,rgba(52,38,20,.05) 82%,
       rgba(52,38,20,0) 100%);
     -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 3%,#000 97%,transparent 100%);
     mask-image:linear-gradient(180deg,transparent 0,#000 3%,#000 97%,transparent 100%);
   }
   .gutter-shade{
     position:absolute;top:var(--pg);bottom:var(--pg);width:46%;
-    pointer-events:none;opacity:calc(var(--shade,0) * .62);z-index:5;
+    pointer-events:none;opacity:calc(var(--shade,0) * .85);z-index:5;
     -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 5.2%,#000 94.8%,transparent 100%);
     mask-image:linear-gradient(180deg,transparent 0,#000 5.2%,#000 94.8%,transparent 100%);
   }
   .gutter-shade.left{left:4%;background:linear-gradient(270deg,rgba(52,38,20,.30),rgba(52,38,20,0) 82%)}
   .gutter-shade.right{right:4%;background:linear-gradient(90deg,rgba(52,38,20,.24),rgba(52,38,20,0) 82%)}
+
+  /* Where the sheet ends. A hairline plus a short inward falloff — paper
+     has a lit top edge and shaded sides, so the ring is not uniform. Sits
+     below the turning leaf (z 6) so a lifted page passes over it. */
+  .sb-frame{
+    position:absolute;inset:0;z-index:5;pointer-events:none;border-radius:2px;
+    box-shadow:
+      inset 0 0 0 1px rgba(58,43,20,.22),
+      inset 0 1px 0 rgba(255,250,236,.5),
+      inset 0 -14px 18px -14px rgba(48,33,12,.34),
+      inset 14px 0 16px -14px rgba(48,33,12,.22),
+      inset -14px 0 16px -14px rgba(48,33,12,.22);
+  }
+
+  /* Tooth. The spreads are flat SVG fills, so without this the page is
+     the one perfectly smooth surface in a drawing full of hand-made
+     marks. Kept faint and multiplied so it darkens the paper rather
+     than greying it. */
+  .sb-grain{
+    position:absolute;inset:0;z-index:5;pointer-events:none;
+    opacity:.42;mix-blend-mode:multiply;border-radius:2px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='4'/%3E%3CfeColorMatrix values='0 0 0 0 .19 0 0 0 0 .15 0 0 0 0 .09 0 0 0 .42 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23p)'/%3E%3C/svg%3E");
+  }
 
   /* ---- the turning leaf: nested strips forming a curved surface ---- */
   .curl{
@@ -231,7 +284,7 @@
   .face .gl{
     position:absolute;left:0;right:0;top:var(--pg);bottom:var(--pg);
     pointer-events:none;background:#fffaf0;
-    opacity:calc(var(--shade,0) * var(--lit,1) * var(--lit,1) * .20);
+    opacity:calc(var(--shade,0) * var(--lit,1) * var(--lit,1) * .27);
   }
 
   /* drag zones, split at the gutter like a real page edge */
@@ -267,7 +320,9 @@
     .sb-arrow.left{left:0}
     .sb-arrow.right{right:0}
     .sb-3d{max-width:none}
-    .sb-stage{padding:0 4px}
+    /* room for the fore-edge and its shadow; at 4px they were sliced off
+       by the viewport and read as stripes rather than page edges */
+    .sb-stage{padding:0 11px}
     .sb-hint{font-size:.6rem;letter-spacing:.1em;padding:0 18px}
   }
 </style>
@@ -336,6 +391,7 @@ const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const N = 18;        /* strips — enough for a smooth curve       */
 const SPAN = 0.449;  /* gutter → outer page edge, as a fraction  */
 const BETA = 0.60;   /* peak curl of the arc, radians            */
+const SHADE = 0.68;  /* how dark a strip goes as it turns away   */
 let idx = 0, turn = null;
 let strips = [];
 
@@ -395,8 +451,8 @@ function applyTurn(t){
     const l2 = Math.abs(Math.cos(tt - (i+1)*td));   /* ...and far edge   */
     const st = strips[i].style;
     st.setProperty('--lit', l1.toFixed(3));
-    st.setProperty('--a1', ((1-l1)*.62).toFixed(3));
-    st.setProperty('--a2', ((1-l2)*.62).toFixed(3));
+    st.setProperty('--a1', ((1-l1)*SHADE).toFixed(3));
+    st.setProperty('--a2', ((1-l2)*SHADE).toFixed(3));
   }
 }
 
@@ -417,6 +473,8 @@ function paint(){
     book.appendChild(buildCurl(turn.dir, turn.from, turn.to));
     applyTurn(turn.t);
   }
+  book.appendChild(el('div','sb-grain'));
+  book.appendChild(el('div','sb-frame'));
   book.appendChild(el('div','sb-gutter'));
   const a = el('button','sb-zone sb-prev'), b = el('button','sb-zone sb-next');
   a.setAttribute('aria-label','önceki sayfa'); b.setAttribute('aria-label','sonraki sayfa');
